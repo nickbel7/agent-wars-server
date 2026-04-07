@@ -1,0 +1,14 @@
+{
+  "name": "realtime-classroom-server",
+  "version": "1.0.0",
+  "description": "Shared 2D board for a classroom exercise on realtime frontend agents",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "dependencies": {
+    "socket.io": "^4.7.5"
+  }
+}

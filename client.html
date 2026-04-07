@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Realtime Board</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0e0e10;
+      color: #eee;
+      font-family: system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    h1 { font-size: 16px; font-weight: 500; margin-bottom: 12px; color: #888; }
+    #join-form {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    #join-form input, #join-form button {
+      font-size: 14px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid #333;
+      background: #1a1a1e;
+      color: #eee;
+      outline: none;
+    }
+    #join-form button {
+      background: #4A90D9;
+      border-color: #4A90D9;
+      cursor: pointer;
+    }
+    #join-form button:hover { background: #3a7bc8; }
+    canvas {
+      border: 1px solid #222;
+      border-radius: 8px;
+      cursor: crosshair;
+    }
+    #status {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h1>REALTIME CLASSROOM BOARD</h1>
+
+  <form id="join-form">
+    <input id="name-input" type="text" placeholder="Your name" autofocus />
+    <input id="color-input" type="color" value="#4A90D9" title="Agent color" />
+    <button type="submit">Join</button>
+  </form>
+
+  <canvas id="board" width="1200" height="800"></canvas>
+  <div id="status">Not connected</div>
+
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script>
+    // ---- Config ------------------------------------------------------------
+    const SERVER = 'http://localhost:3000';
+
+    // ---- DOM ---------------------------------------------------------------
+    const canvas  = document.getElementById('board');
+    const ctx     = canvas.getContext('2d');
+    const form    = document.getElementById('join-form');
+    const nameIn  = document.getElementById('name-input');
+    const colorIn = document.getElementById('color-input');
+    const status  = document.getElementById('status');
+
+    // ---- State -------------------------------------------------------------
+    let socket = null;
+    let myId   = null;
+    const agents = new Map();
+    const zones  = new Map();
+
+    // ---- Join flow ---------------------------------------------------------
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = nameIn.value.trim();
+      if (!name) return;
+
+      socket = io(SERVER);
+
+      socket.on('connect', () => {
+        status.textContent = 'Connected — joining…';
+        socket.emit('agent:join', { name, color: colorIn.value }, (res) => {
+          if (res.error) { status.textContent = 'Error: ' + res.error; return; }
+          myId = res.agent.id;
+          for (const a of res.agents) agents.set(a.id, a);
+          for (const z of res.zones)  zones.set(z.id, z);
+          form.style.display = 'none';
+          status.textContent = `Joined as ${name} — click the board to move`;
+        });
+      });
+
+      socket.on('disconnect', () => {
+        status.textContent = 'Disconnected';
+      });
+
+      // ---- Server events ---------------------------------------------------
+      socket.on('agent:joined', (a) => agents.set(a.id, a));
+      socket.on('agent:moved',  ({ id, x, y }) => {
+        const a = agents.get(id);
+        if (a) { a.x = x; a.y = y; }
+      });
+      socket.on('agent:left', ({ id }) => agents.delete(id));
+
+      socket.on('zone:spawned',  (z) => zones.set(z.id, z));
+      socket.on('zone:updated',  (z) => zones.set(z.id, z));
+      socket.on('zone:resolved', (z) => zones.set(z.id, z));
+    });
+
+    // ---- Movement (click to move) ------------------------------------------
+    canvas.addEventListener('click', (e) => {
+      if (!socket || !myId) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      socket.emit('agent:move', { x, y });
+      const me = agents.get(myId);
+      if (me) { me.x = x; me.y = y; }
+
+      // Auto-claim any zone we land in
+      for (const z of zones.values()) {
+        if (z.status !== 'active') continue;
+        const dist = Math.hypot(z.x - x, z.y - y);
+        if (dist <= z.radius) {
+          socket.emit('zone:claim', { zoneId: z.id });
+          break;
+        }
+      }
+    });
+
+    // ---- Render loop -------------------------------------------------------
+    function draw() {
+      ctx.clearRect(0, 0, 1200, 800);
+
+      // Grid
+      ctx.strokeStyle = '#1a1a1e';
+      for (let x = 0; x <= 1200; x += 100) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 800); ctx.stroke();
+      }
+      for (let y = 0; y <= 800; y += 100) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(1200, y); ctx.stroke();
+      }
+
+      // Zones
+      for (const z of zones.values()) {
+        const resolved = z.status === 'resolved';
+        // Glow
+        ctx.beginPath();
+        ctx.arc(z.x, z.y, z.radius, 0, Math.PI * 2);
+        ctx.fillStyle = resolved ? 'rgba(0, 200, 0, 0.08)' : 'rgba(255, 40, 40, 0.12)';
+        ctx.fill();
+        // Border
+        ctx.beginPath();
+        ctx.arc(z.x, z.y, z.radius, 0, Math.PI * 2);
+        ctx.strokeStyle = resolved ? 'rgba(0, 200, 0, 0.4)' : 'rgba(255, 40, 40, 0.6)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.lineWidth = 1;
+        // Label
+        if (!resolved) {
+          ctx.fillStyle = 'rgba(255, 80, 80, 0.7)';
+          ctx.font = '11px monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText(`sev ${z.severity}`, z.x, z.y + 4);
+          if (z.claimedBy) {
+            ctx.fillStyle = 'rgba(255, 200, 50, 0.7)';
+            ctx.fillText('repairing…', z.x, z.y + 18);
+          }
+        }
+      }
+
+      // Agents
+      for (const a of agents.values()) {
+        const half = a.size / 2;
+        const isMe = a.id === myId;
+
+        // Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        ctx.fillRect(a.x - half + 2, a.y - half + 2, a.size, a.size);
+
+        // Square
+        ctx.fillStyle = a.color || '#4A90D9';
+        if (isMe) {
+          ctx.fillStyle = '#fff';
+        }
+        ctx.fillRect(a.x - half, a.y - half, a.size, a.size);
+
+        // Name
+        ctx.fillStyle = isMe ? '#fff' : '#aaa';
+        ctx.font = '12px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(a.name, a.x, a.y - half - 8);
+      }
+
+      requestAnimationFrame(draw);
+    }
+    draw();
+  </script>
+</body>
+</html>
