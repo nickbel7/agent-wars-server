@@ -3,6 +3,9 @@
 // ---------------------------------------------------------------------------
 
 import { createServer } from 'node:http';
+import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 import { Server } from 'socket.io';
 
 import { C2S, S2C } from './protocol.js';
@@ -15,19 +18,58 @@ import {
   claimZone,
 } from './state.js';
 import { startGameLoop } from './gameLoop.js';
+import { renderLanding } from './landing.js';
 
 const PORT = process.env.PORT || 3000;
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const ROOT = join(__dirname, '..');
 
-const httpServer = createServer((_req, res) => {
-  res.writeHead(200, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({ status: 'ok' }));
+// ---- HTTP server -----------------------------------------------------------
+
+const httpServer = createServer(async (req, res) => {
+  if (req.method === 'GET' && req.url === '/') {
+    const html = renderLanding(io.engine.clientsCount);
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end(html);
+    return;
+  }
+
+  if (req.method === 'GET' && req.url === '/client.html') {
+    try {
+      const file = await readFile(join(ROOT, 'client.html'), 'utf-8');
+      res.writeHead(200, {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Content-Disposition': 'attachment; filename="agent-wars-client.html"',
+      });
+      res.end(file);
+    } catch {
+      res.writeHead(404);
+      res.end('client.html not found');
+    }
+    return;
+  }
+
+  if (req.method === 'GET' && req.url === '/api/status') {
+    const data = {
+      status: 'ok',
+      agents: getAllAgents().length,
+      activeZones: getActiveZones().length,
+      sockets: io.engine.clientsCount,
+    };
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(data));
+    return;
+  }
+
+  res.writeHead(404);
+  res.end('Not found');
 });
+
+// ---- Socket.IO -------------------------------------------------------------
 
 const io = new Server(httpServer, {
   cors: { origin: '*' },
 });
-
-// ---- Socket.IO handler -----------------------------------------------------
 
 io.on('connection', (socket) => {
   console.log(`+ socket connected: ${socket.id}`);
