@@ -39,11 +39,6 @@
       color: var(--text); outline: none; width: 160px; transition: border-color .2s;
     }
     #join-panel input[type="text"]:focus { border-color: var(--accent); }
-    #join-panel input[type="color"] {
-      width: 32px; height: 30px; border-radius: 5px;
-      border: 1px solid var(--border); background: var(--surface2);
-      cursor: pointer; padding: 2px;
-    }
     .btn {
       font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 700;
       padding: 6px 14px; border-radius: 6px; border: none; cursor: pointer;
@@ -143,7 +138,6 @@
     <div id="join-panel">
       <div class="conn-dot" id="conn-dot"></div>
       <input id="name-input" type="text" placeholder="Your name, gang member..." maxlength="30" autofocus />
-      <input id="color-input" type="color" value="#00e5ff" />
       <button id="join-btn" class="btn" type="button">Hop in the Van!</button>
       <button id="auto-btn" class="btn" type="button">🐾 Scooby Mode</button>
     </div>
@@ -227,7 +221,7 @@
   const chartCv    = document.getElementById('chart-canvas');
   const chartCtx   = chartCv.getContext('2d');
   const nameIn     = document.getElementById('name-input');
-  const colorIn    = document.getElementById('color-input');
+
   const joinBtn    = document.getElementById('join-btn');
   const autoBtn    = document.getElementById('auto-btn');
   const connDot    = document.getElementById('conn-dot');
@@ -252,7 +246,7 @@
   let socket   = null;
   let myId     = null;
   let myName   = '';
-  let myColor  = '#00e5ff';
+  let myColor  = '#4bb8a8';
   let joinedAt = null;
 
   const agents       = new Map();
@@ -584,37 +578,18 @@
 
   function drawAgent(a) {
     const isMe = a.id === myId;
-    const color = a.color || '#4bb8a8';
     // Van dimensions: ~1.75:1 aspect ratio
-    const vW = 70, vH = 40;
-
-    ctx.save();
-    if (isMe) {
-      ctx.shadowBlur = 18;
-      ctx.shadowColor = color;
-    }
+    const vW = 100, vH = 58;
 
     if (vanImg.complete && vanImg.naturalWidth > 0) {
-      // Tint the van with the player's chosen colour via a coloured underlay
-      if (isMe) {
-        ctx.globalAlpha = 0.22;
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        if (ctx.roundRect) ctx.roundRect(a.x - vW/2, a.y - vH/2, vW, vH, 6);
-        else ctx.rect(a.x - vW/2, a.y - vH/2, vW, vH);
-        ctx.fill();
-        ctx.globalAlpha = 1;
-      }
       ctx.drawImage(vanImg, a.x - vW/2, a.y - vH/2, vW, vH);
     } else {
-      // Fallback: coloured circle until image loads
+      // Fallback circle until image loads
       ctx.beginPath();
-      ctx.arc(a.x, a.y, 20, 0, Math.PI * 2);
-      ctx.fillStyle = color;
+      ctx.arc(a.x, a.y, 24, 0, Math.PI * 2);
+      ctx.fillStyle = '#4bb8a8';
       ctx.fill();
     }
-
-    ctx.restore();
 
     // Agent name label above van
     const label = isMe ? ('\u00BB ' + a.name) : a.name;
@@ -622,12 +597,12 @@
     ctx.textAlign = 'center';
     const tw = ctx.measureText(label).width;
     const py = a.y - vH/2 - 18;
-    ctx.fillStyle = isMe ? 'rgba(15,11,6,.92)' : 'rgba(15,11,6,.75)';
+    ctx.fillStyle = 'rgba(15,11,6,.88)';
     ctx.beginPath();
     if (ctx.roundRect) ctx.roundRect(a.x - tw/2 - 5, py, tw + 10, 15, 3);
     else ctx.rect(a.x - tw/2 - 5, py, tw + 10, 15);
     ctx.fill();
-    ctx.fillStyle = isMe ? color : '#c8b89a';
+    ctx.fillStyle = isMe ? '#4bb8a8' : '#c8b89a';
     ctx.fillText(label, a.x, py + 11);
   }
 
@@ -715,7 +690,6 @@
     if (!name) { nameIn.focus(); return; }
     joinBtn.disabled = true;
     myName  = name;
-    myColor = colorIn.value;
     setStatus('Connecting...');
     socket = io(SERVER);
 
@@ -736,7 +710,6 @@
         res.agents.forEach(function(a) { agents.set(a.id, a); agentTargets.set(a.id, { x: a.x, y: a.y }); });
         res.zones.forEach(function(z)  { zones.set(z.id, z); });
         nameIn.disabled  = true;
-        colorIn.disabled = true;
         joinBtn.style.display = 'none';
         autoBtn.style.display = 'inline-flex';
         keysHint.style.display = 'flex';
