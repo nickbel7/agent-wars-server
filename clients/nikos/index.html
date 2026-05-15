@@ -253,6 +253,7 @@
   let autoMode      = false;
   let autoInterval  = null;
   let currentTarget = null;
+  const pendingClaims = new Set(); // zones already claimed, awaiting zone:updated
 
   // ===========================================================================
   // LOGGING
@@ -632,9 +633,18 @@
     if (!currentTarget) return;
     const dist = Math.hypot(currentTarget.x - me.x, currentTarget.y - me.y);
     if (dist <= currentTarget.radius) {
-      // Already claimed by us — wait for zone:resolved, don't re-claim
-      if (currentTarget.claimedBy === myId) return;
+      if (currentTarget.claimedBy === myId) {
+        // Repair in progress — re-emit zone center every tick so the server
+        // never decides we left and silently cancels the claim.
+        socket.emit('agent:move', { x: currentTarget.x, y: currentTarget.y });
+        me.x = currentTarget.x; me.y = currentTarget.y;
+        return;
+      }
+      // Only send one claim per zone while awaiting the zone:updated ACK.
+      if (pendingClaims.has(currentTarget.id)) return;
+      pendingClaims.add(currentTarget.id);
       socket.emit('zone:claim', { zoneId: currentTarget.id }, function(res) {
+        if (!res || !res.ok) pendingClaims.delete(currentTarget ? currentTarget.id : '');
         if (res && res.ok) log('[AUTO] Claimed SEV ' + (currentTarget ? currentTarget.severity : '?') + ' zone', 'auto');
       });
     } else {
@@ -753,6 +763,7 @@
 
     socket.on('zone:updated', function(z) {
       zones.set(z.id, z);
+      pendingClaims.delete(z.id); // claim acknowledged by server
       refreshZonesList();
       if (z.claimedBy === myId && !myRepairs.has(z.id)) {
         startRepairOverlay(z.id);
@@ -761,6 +772,7 @@
     });
 
     socket.on('zone:resolved', function(z) {
+      pendingClaims.delete(z.id);
       const prev = zones.get(z.id);
       zones.set(z.id, z);
       removeRepairOverlay(z.id);
