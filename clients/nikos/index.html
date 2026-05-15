@@ -632,6 +632,8 @@
     if (!currentTarget) return;
     const dist = Math.hypot(currentTarget.x - me.x, currentTarget.y - me.y);
     if (dist <= currentTarget.radius) {
+      // Already claimed by us — wait for zone:resolved, don't re-claim
+      if (currentTarget.claimedBy === myId) return;
       socket.emit('zone:claim', { zoneId: currentTarget.id }, function(res) {
         if (res && res.ok) log('[AUTO] Claimed SEV ' + (currentTarget ? currentTarget.severity : '?') + ' zone', 'auto');
       });
