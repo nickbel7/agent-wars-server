@@ -6,16 +6,28 @@
   <title>Mystery Inc — Scooby-Doo Wars</title>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap');
     :root {
-      --bg:         #f2ede4; --surface:    #ffffff; --surface2:   #f8f4ed;
-      --border:     #ddd0b8; --accent:     #1e9180; --accent2:    #c4447a;
-      --danger:     #cc2828; --warning:    #d96000; --success:    #2d7a18;
-      --auto-on:    #d96000; --text:       #1a1208; --text-muted: #7a6040;
+      --bg:         #672f91; /* Vibrant Purple */
+      --surface:    #ffffff;
+      --surface2:   #f4f1f8;
+      --border:     #e0d8ea;
+      --accent:     #8bc53f; /* Mystery Machine Green */
+      --accent2:    #f57f20; /* Vibrant Orange */
+      --danger:     #e63946;
+      --warning:    #fbbc05; /* Scooby Yellow */
+      --success:    #2a9d8f;
+      --auto-on:    #8bc53f;
+      --text:       #333333;
+      --text-muted: #666666;
     }
     body {
-      background: var(--bg); color: var(--text);
-      font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 14px;
+      background-color: var(--bg);
+      background-image: url('assets/scooby-doo-background.png');
+      background-size: cover;
+      background-position: center;
+      color: var(--text);
+      font-family: 'Nunito', system-ui, sans-serif; font-size: 14px;
       height: 100vh;
       display: grid; grid-template-rows: auto 1fr auto; overflow: hidden;
     }
@@ -31,15 +43,15 @@
     .logo-text span { color: var(--warning); }
     #join-panel { display: flex; align-items: center; gap: 8px; }
     #join-panel input[type="text"] {
-      font-family: 'Space Grotesk', sans-serif; font-size: 14px;
-      padding: 7px 12px; border-radius: 8px;
-      border: 1.5px solid var(--border); background: var(--surface2);
-      color: var(--text); outline: none; width: 180px; transition: border-color .2s;
+      font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 600;
+      padding: 8px 14px; border-radius: 8px;
+      border: none; background: rgba(0,0,0,0.04);
+      color: #1a1208; outline: none; width: 180px; transition: background .2s;
     }
-    #join-panel input[type="text"]:focus { border-color: var(--accent); }
+    #join-panel input[type="text"]:focus { background: rgba(0,0,0,0.08); }
     .btn {
-      font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600;
-      padding: 7px 16px; border-radius: 8px; border: none; cursor: pointer;
+      font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 700;
+      padding: 8px 18px; border-radius: 8px; border: none; cursor: pointer;
       transition: opacity .2s, transform .1s; white-space: nowrap;
     }
     .btn:hover   { opacity: .85; transform: translateY(-1px); }
@@ -47,16 +59,16 @@
     .btn:disabled{ opacity: .35; cursor: not-allowed; transform: none; }
     #join-btn { background: var(--accent); color: #fff; }
     #auto-btn {
-      background: var(--surface2); color: var(--text-muted);
-      border: 1.5px solid var(--border); display: none;
+      background: rgba(0,0,0,0.05); color: var(--text-muted);
+      border: none; display: none;
     }
     #auto-btn.active {
-      background: var(--auto-on); color: #fff; border-color: var(--auto-on);
+      background: var(--auto-on); color: #fff; box-shadow: 0 4px 12px rgba(217,96,0,.25);
     }
     .keys-hint { font-size: 12px; color: var(--text-muted); display: none; gap: 8px; flex-wrap: wrap; }
     .key {
       background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 4px; padding: 1px 6px; font-family: 'Space Grotesk', sans-serif; font-weight: 600;
+      border-radius: 4px; padding: 1px 6px; font-family: 'Nunito', sans-serif; font-weight: 600;
     }
     .hud { display: flex; align-items: center; gap: 12px; margin-left: auto; }
     .stat { display: flex; flex-direction: column; align-items: center; gap: 1px; min-width: 52px; }
@@ -66,59 +78,60 @@
     }
     .stat-value.auto-color { color: var(--auto-on); }
     .stat-value.snack-val { display: flex; align-items: center; gap: 4px; }
-    .snack-icon { width: 18px; height: 18px; object-fit: contain; vertical-align: middle; }
-    .stat-label { font-size: 10px; font-weight: 600; text-transform: uppercase;
+    .snack-icon { width: 32px; height: 32px; object-fit: contain; vertical-align: middle; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1)); }
+    .stat-label { font-size: 13px; font-weight: 700; text-transform: uppercase;
                   letter-spacing: .5px; color: var(--text-muted); }
-    .stat-divider { width: 1px; height: 28px; background: var(--border); }
-    .layout { display: grid; grid-template-columns: 1fr 220px; overflow: hidden; }
+    .stat-divider { width: 1px; height: 28px; background: rgba(0,0,0,0.06); }
+    .layout { display: grid; grid-template-columns: 1fr 260px; overflow: hidden; }
     .board-wrapper {
       position: relative; display: flex; align-items: center; justify-content: center;
-      background: var(--bg); overflow: auto; padding: 12px;
+      background: transparent; overflow: auto; padding: 12px;
     }
-    canvas#board { border: 1px solid var(--border); border-radius: 6px; cursor: crosshair; display: block; flex-shrink: 0; box-shadow: 0 2px 12px rgba(0,0,0,.15); }
+    canvas#board { border: none; border-radius: 12px; cursor: crosshair; display: block; flex-shrink: 0; box-shadow: 0 8px 30px rgba(0,0,0,.15); }
     .repair-overlay { position: absolute; pointer-events: none; text-align: center; transform: translateX(-50%); }
     .repair-bar-wrap { background: rgba(0,0,0,.3); border-radius: 8px; overflow: hidden; width: 80px; height: 8px; }
     .repair-bar-fill { height: 100%; background: var(--warning); border-radius: 8px; }
     .repair-label { font-family: 'Fredoka One', cursive; font-size: 11px; color: #fff; font-weight: 600; margin-top: 3px; }
-    .sidebar { background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; box-shadow: -1px 0 4px rgba(0,0,0,.05); }
-    .sb-section { padding: 10px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-    .sb-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; }
-    canvas#minimap { border: 1px solid var(--border); border-radius: 4px; display: block; width: 100%; height: auto; }
-    #agents-list { display: flex; flex-direction: column; gap: 4px; overflow-y: auto; padding: 10px 12px; max-height: 130px; }
-    .agent-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 6px; background: var(--surface2); border: 1px solid var(--border); }
-    .agent-item.is-me { border-color: var(--accent); background: rgba(30,145,128,.06); }
+    .sidebar { background: #1e0b33; border: none; display: flex; flex-direction: column; overflow-y: auto; box-shadow: -4px 0 24px rgba(0,0,0,.4); }
+    .sb-section { padding: 16px 16px; border: none; flex-shrink: 0; }
+    .sb-title { font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: #8bc53f; margin-bottom: 12px; }
+    canvas#minimap { border: none; border-radius: 10px; display: block; width: 100%; height: auto; box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
+    #agents-list { display: flex; flex-direction: column; gap: 4px; padding: 4px 4px 12px; }
+    .agent-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; background: #2d1148; }
+    .agent-item.is-me { background: #8bc53f; }
+    .agent-item.is-me .agent-name { color: #000; }
     .agent-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-    .agent-name { font-size: 13px; font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .agent-badge { font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 4px; background: var(--accent); color: #fff; text-transform: uppercase; }
+    .agent-name { font-size: 14px; font-weight: 700; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #fff; }
+    .agent-badge { font-size: 10px; font-weight: 800; padding: 3px 10px; border-radius: 4px; background: #000; color: #8bc53f; text-transform: uppercase; letter-spacing: 1px; }
     #zones-section { flex-shrink: 0; }
-    #zones-list { display: flex; flex-direction: column; gap: 4px; overflow-y: auto; max-height: 110px; padding: 0 12px 8px; }
-    .zone-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; border-radius: 6px; background: var(--surface2); border: 1px solid var(--border); font-size: 12px; }
-    .zone-item.active  { border-color: var(--danger); }
-    .zone-item.claimed { border-color: var(--warning); }
-    .zone-item.target  { border-color: var(--auto-on); background: rgba(217,96,0,.06); }
-    .zone-sev { font-weight: 700; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
-    .sev-1 { background: rgba(0,180,80,.15);  color: #1a8040; }
-    .sev-2 { background: rgba(180,160,0,.15); color: #7a6a00; }
-    .sev-3 { background: rgba(200,120,0,.15); color: #a05000; }
-    .sev-4 { background: rgba(220,60,0,.15);  color: #aa2800; }
-    .sev-5 { background: rgba(200,20,20,.15); color: #aa0000; }
-    .zone-status { font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--text-muted); }
+    #zones-list { display: flex; flex-direction: column; gap: 4px; padding: 0 4px 12px; }
+    .zone-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: 8px; background: #2d1148; font-size: 14px; font-weight: 700; }
+    .zone-villain { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+    .zone-sev { font-weight: 800; padding: 4px 10px; border-radius: 4px; font-size: 11px; letter-spacing: .5px; flex-shrink: 0; }
+    .sev-1 { background: #00b86b; color: #000; }
+    .sev-2 { background: #f0c000; color: #000; }
+    .sev-3 { background: #ff7a00; color: #000; }
+    .sev-4 { background: #e03030; color: #fff; }
+    .sev-5 { background: #fff; color: #000; }
+    .zone-status { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.35); flex-shrink: 0; }
+    .zone-item.target  .zone-status { color: #8bc53f; }
+    .zone-item.claimed .zone-status { color: #fff; }
     #stats-section { flex-shrink: 0; }
-    #chart-canvas { display: block; width: 100%; height: auto; border: 1px solid var(--border); border-radius: 3px; }
-    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 6px; }
-    .stats-mini { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 5px 7px; text-align: center; }
-    .stats-mini-val { font-family: 'Fredoka One', cursive; font-size: 18px; color: var(--accent); }
-    .stats-mini-lbl { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-top: 1px; }
-    #log-section { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-    #log { flex: 1; overflow-y: auto; display: flex; flex-direction: column-reverse; gap: 3px; padding: 0 14px 10px; font-size: 11px; }
-    .log-entry { color: var(--text-muted); line-height: 1.5; }
-    .log-entry.info    { color: #1a72cc; }
-    .log-entry.success { color: var(--success); }
-    .log-entry.warn    { color: var(--warning); }
-    .log-entry.error   { color: var(--danger); }
-    .log-entry.auto    { color: var(--auto-on); }
-    #status-bar { background: var(--surface); border-top: 1px solid var(--border); padding: 5px 16px; font-size: 12px; color: var(--text-muted); }
-    #status-bar span { color: var(--accent); font-weight: 600; }
+    #chart-canvas { display: block; width: 100%; height: auto; border: none; border-radius: 8px; background: #000; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+    .stats-mini { background: #2d1148; border: none; border-radius: 8px; padding: 12px 10px; text-align: center; }
+    .stats-mini-val { font-family: 'Fredoka One', cursive; font-size: 24px; color: #fff; }
+    .stats-mini-lbl { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.4); margin-top: 4px; }
+    #log-section { display: flex; flex-direction: column; }
+    #log { max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 3px; padding: 0 4px 8px; font-size: 12px; font-family: 'Nunito', sans-serif; font-weight: 600; }
+    .log-entry { line-height: 1.4; padding: 7px 12px; border-radius: 6px; color: rgba(255,255,255,0.55); background: #2d1148; }
+    .log-entry.info    { color: #fff; }
+    .log-entry.success { color: #8bc53f; }
+    .log-entry.warn    { color: #f0c000; }
+    .log-entry.error   { color: #e03030; }
+    .log-entry.auto    { color: rgba(255,255,255,0.55); }
+    #status-bar { background: #000; border: none; padding: 8px 20px; font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.4); }
+    #status-bar span { color: #8bc53f; font-weight: 700; }
     .conn-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-muted); transition: background .3s; flex-shrink: 0; }
     .conn-dot.connected { background: var(--success); box-shadow: 0 0 6px var(--success); }
     .conn-dot.error     { background: var(--danger); }
@@ -177,7 +190,7 @@
           <div class="stats-mini"><div class="stats-mini-val" id="si-avg">--</div><div class="stats-mini-lbl">Avg solve (s)</div></div>
         </div>
       </div>
-      <div id="log-section" class="sb-section" style="flex:1;overflow:hidden;border:none;padding-bottom:0">
+      <div id="log-section" class="sb-section" style="border:none;padding-bottom:16px">
         <div class="sb-title">Mystery Log</div>
         <div id="log"></div>
       </div>
@@ -197,6 +210,30 @@
   const vanImg     = new Image();
   const biscuitImg = new Image();
   const bgImg      = new Image();
+  const flower1Img = new Image();
+  const flower2Img = new Image();
+  flower1Img.src   = 'assets/scooby-flower-1.png';
+  flower2Img.src   = 'assets/scooby-flower-2.png';
+
+  // Villain images for each severity level
+  const targetImgs = [null];
+  for (let i = 1; i <= 5; i++) {
+    const img = new Image();
+    img.src = 'assets/target-' + i + '.png';
+    targetImgs.push(img);
+  }
+
+  // Generate static positions for map flowers
+  const flowers = [];
+  for (let i=0; i<15; i++) {
+    flowers.push({
+      x: Math.random() * 1200,
+      y: Math.random() * 800,
+      type: Math.random() > 0.5 ? 1 : 2,
+      scale: 0.4 + Math.random() * 0.8,
+      rot: Math.random() * Math.PI * 2
+    });
+  }
   vanImg.src     = 'assets/scooby-doo-van.png';
   biscuitImg.src = 'assets/scooby-biscuit.png';
   bgImg.src      = 'assets/scooby-doo-background.png';
@@ -245,6 +282,7 @@
   let myName   = '';
   let myColor  = '#4bb8a8';
   let joinedAt = null;
+  let floatingSnacks = [];
 
   const agents        = new Map();
   const agentTargets  = new Map();
@@ -317,13 +355,17 @@
       return;
     }
     active.forEach(function(z) {
+      const sev = Math.min(5, Math.max(1, z.severity));
       const isTarget = currentTarget && currentTarget.id === z.id;
       const cls = isTarget ? 'zone-item target' : (z.claimedBy ? 'zone-item claimed' : 'zone-item active');
-      const sevCls = 'sev-' + Math.min(5, Math.max(1, z.severity));
+      const sevCls = 'sev-' + sev;
       const statusTxt = isTarget ? '&#9889; TARGET' : (z.claimedBy ? 'repairing' : 'active');
       const item = document.createElement('div');
       item.className = cls;
-      item.innerHTML = '<span class="zone-sev ' + sevCls + '">CLUE ' + z.severity + '</span><span class="zone-status">' + statusTxt + '</span>';
+      item.innerHTML =
+        '<img class="zone-villain" src="assets/target-' + sev + '.png" alt="" />'
+        + '<span class="zone-sev ' + sevCls + '">CLUE ' + z.severity + '</span>'
+        + '<span class="zone-status">' + statusTxt + '</span>';
       zonesList.appendChild(item);
     });
   }
@@ -462,14 +504,24 @@
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Background image + dark overlay for readability
-    if (bgImg.complete && bgImg.naturalWidth > 0) {
-      ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
-    } else {
-      ctx.fillStyle = '#c8b898';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.42)';
+    // Removed bgImg filling since it's applied to the body now.
+    // Plain color with good contrast (dark purple)
+    ctx.fillStyle = '#221533'; 
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw flowers
+    flowers.forEach(f => {
+      const img = f.type === 1 ? flower1Img : flower2Img;
+      if (img.complete && img.naturalWidth > 0) {
+        ctx.save();
+        ctx.globalAlpha = 0.15; // Reduced opacity
+        ctx.translate(f.x, f.y);
+        ctx.rotate(f.rot);
+        ctx.scale(f.scale * 0.25, f.scale * 0.25); // Much smaller
+        ctx.drawImage(img, -img.naturalWidth/2, -img.naturalHeight/2);
+        ctx.restore();
+      }
+    });
 
     const now = Date.now();
 
@@ -491,6 +543,37 @@
 
     zones.forEach(function(z) { drawZone(z, now); });
     agents.forEach(function(a) { drawAgent(a); });
+    
+    // Process and draw floating snacks
+    for (let i = floatingSnacks.length - 1; i >= 0; i--) {
+      const fs = floatingSnacks[i];
+      const elapsed = now - fs.startTime;
+      const duration = 1500;
+      if (elapsed > duration) {
+        floatingSnacks.splice(i, 1);
+        continue;
+      }
+      
+      const progress = elapsed / duration;
+      const currentY = fs.y - (progress * 60); // floats up 60px
+      const alpha = 1 - Math.pow(progress, 3); // fades out towards end
+      
+      ctx.fillStyle = `rgba(28, 178, 20, ${alpha})`;
+      ctx.font = 'bold 22px Nunito, sans-serif';
+      ctx.textAlign = 'center';
+      
+      // text shadow for contrast
+      ctx.shadowColor = `rgba(0,0,0,${alpha * 0.4})`;
+      ctx.shadowBlur = 4;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 2;
+      
+      ctx.fillText(`+${fs.amount} 🐾`, fs.x, currentY);
+      
+      // reset shadow
+      ctx.shadowBlur = 0;
+      ctx.shadowColor = 'transparent';
+    }
 
     myRepairs.forEach(function(entry, zoneId) {
       const z = zones.get(zoneId);
@@ -505,62 +588,80 @@
     const claimed  = z.status === 'active' && z.claimedBy;
     const isTarget = autoMode && currentTarget && currentTarget.id === z.id;
     const sev = Math.min(5, Math.max(1, z.severity));
-    const palette = [
+    const ringColors = [
       null,
-      { ring: '#00cc66', fill: 'rgba(0,204,102,0.07)',  text: '#00cc66' },
-      { ring: '#cccc00', fill: 'rgba(204,204,0,0.08)',  text: '#cccc00' },
-      { ring: '#ffaa00', fill: 'rgba(255,170,0,0.09)',  text: '#ffaa00' },
-      { ring: '#ff5000', fill: 'rgba(255,80,0,0.11)',   text: '#ff5000' },
-      { ring: '#ff2828', fill: 'rgba(255,40,40,0.13)',  text: '#ff2828' }
+      '#00cc66', '#cccc00', '#ffaa00', '#ff5000', '#ff2828'
     ];
-    const p = resolved ? { ring: 'rgba(75,184,168,0.35)', fill: 'rgba(75,184,168,0.05)', text: '#4bb8a8' } : palette[sev];
+    const ring = resolved ? 'rgba(75,184,168,0.6)' : ringColors[sev];
     const pulse = (!resolved && !claimed) ? Math.sin(now / 480) * 4 : 0;
     const R = z.radius + pulse;
 
+    ctx.save();
+    // Clip to circle
     ctx.beginPath();
     ctx.arc(z.x, z.y, R, 0, Math.PI * 2);
-    ctx.fillStyle = p.fill;
-    ctx.fill();
+    ctx.clip();
 
+    // Draw villain image filling the circle, or fallback solid colour
+    const villainImg = !resolved && targetImgs[sev];
+    if (villainImg && villainImg.complete && villainImg.naturalWidth > 0) {
+      ctx.drawImage(villainImg, z.x - R, z.y - R, R * 2, R * 2);
+    } else {
+      ctx.fillStyle = resolved ? 'rgba(75,184,168,0.25)' : 'rgba(30,20,50,0.7)';
+      ctx.fillRect(z.x - R, z.y - R, R * 2, R * 2);
+    }
+
+    // Dark scrim for text readability
+    ctx.fillStyle = resolved ? 'rgba(0,0,0,0.35)' : 'rgba(0,0,0,0.45)';
+    ctx.fillRect(z.x - R, z.y - R, R * 2, R * 2);
+
+    ctx.restore();
+
+    // Coloured ring border
     ctx.beginPath();
     ctx.arc(z.x, z.y, R, 0, Math.PI * 2);
-    ctx.strokeStyle = isTarget ? 'rgba(232,131,27,0.95)' : (resolved ? 'rgba(75,184,168,0.35)' : p.ring);
-    ctx.lineWidth = isTarget ? 3 : (claimed ? 2 : 1.5);
+    ctx.strokeStyle = isTarget ? '#f57f20' : ring;
+    ctx.lineWidth = isTarget ? 4 : (claimed ? 3 : 2.5);
     ctx.setLineDash(resolved ? [5,4] : []);
     ctx.stroke();
     ctx.setLineDash([]);
     ctx.lineWidth = 1;
 
+    // Repair progress arc
     if (claimed && z.repairStartedAt) {
       const angle = Math.min(1, (now - z.repairStartedAt) / REPAIR_MS) * Math.PI * 2;
       ctx.beginPath();
       ctx.arc(z.x, z.y, R, -Math.PI / 2, -Math.PI / 2 + angle);
-      ctx.strokeStyle = '#4bb8a8';
-      ctx.lineWidth = 3.5;
+      ctx.strokeStyle = '#5ee8d6';
+      ctx.lineWidth = 4;
       ctx.stroke();
       ctx.lineWidth = 1;
     }
 
+    // Labels
+    ctx.textAlign = 'center';
     if (!resolved) {
-      ctx.fillStyle = isTarget ? 'rgba(232,131,27,0.95)' : p.text;
-      ctx.font = 'bold 12px Fredoka One, cursive';
-      ctx.textAlign = 'center';
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 13px Nunito, sans-serif';
+      ctx.shadowColor = 'rgba(0,0,0,0.8)';
+      ctx.shadowBlur = 4;
       ctx.fillText('CLUE ' + sev, z.x, z.y + 5);
       if (claimed) {
-        ctx.fillStyle = '#4bb8a8';
-        ctx.font = '10px Fredoka One, cursive';
-        ctx.fillText('Ruh-Roh!', z.x, z.y + 18);
+        ctx.font = 'bold 10px Nunito, sans-serif';
+        ctx.fillText('Ruh-Roh!', z.x, z.y + 19);
+      } else if (isTarget) {
+        ctx.fillStyle = '#fbbc05';
+        ctx.font = 'bold 10px Nunito, sans-serif';
+        ctx.fillText('Jinkies!', z.x, z.y + 19);
       }
-      if (isTarget && !claimed) {
-        ctx.fillStyle = 'rgba(232,131,27,.9)';
-        ctx.font = '10px Fredoka One, cursive';
-        ctx.fillText('Jinkies!', z.x, z.y + 18);
-      }
+      ctx.shadowBlur = 0;
     } else {
-      ctx.fillStyle = 'rgba(75,184,168,.55)';
-      ctx.font = 'bold 11px Fredoka One, cursive';
-      ctx.textAlign = 'center';
-      ctx.fillText('ZOINKS! SOLVED!', z.x, z.y + 5);
+      ctx.fillStyle = '#5ee8d6';
+      ctx.font = 'bold 11px Nunito, sans-serif';
+      ctx.shadowColor = 'rgba(0,0,0,0.8)';
+      ctx.shadowBlur = 4;
+      ctx.fillText('SOLVED!', z.x, z.y + 5);
+      ctx.shadowBlur = 0;
     }
   }
 
@@ -579,7 +680,7 @@
         ctx.fill();
       }
       const label = '\u00BB ' + a.name;
-      ctx.font = 'bold 13px Fredoka One, cursive';
+      ctx.font = 'bold 13px Nunito, sans-serif';
       ctx.textAlign = 'center';
       const tw = ctx.measureText(label).width;
       const py = a.y - vH/2 - 22;
@@ -594,23 +695,27 @@
       // Other agents: simple coloured circle
       if (!playerNumbers.has(a.id)) { playerNumbers.set(a.id, playerCounter++); }
       const num = playerNumbers.get(a.id);
-      const r = 14;
+      const r = 16;
       ctx.beginPath();
       ctx.arc(a.x, a.y, r, 0, Math.PI * 2);
-      ctx.fillStyle = a.color || '#888';
+      ctx.fillStyle = a.color || '#cccccc';
       ctx.fill();
-      const label = 'Player ' + num;
-      ctx.font = '12px Space Grotesk, sans-serif';
+      ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+      ctx.lineWidth = 1;
+      const label = a.name || ('Player ' + num);
+      ctx.font = 'bold 12px Nunito, sans-serif';
       ctx.textAlign = 'center';
       const tw = ctx.measureText(label).width;
       const py = a.y - r - 18;
-      ctx.fillStyle = 'rgba(0,0,0,.65)';
+      ctx.fillStyle = 'rgba(0,0,0,.72)';
       ctx.beginPath();
-      if (ctx.roundRect) ctx.roundRect(a.x - tw/2 - 5, py, tw + 10, 15, 3);
-      else ctx.rect(a.x - tw/2 - 5, py, tw + 10, 15);
+      if (ctx.roundRect) ctx.roundRect(a.x - tw/2 - 5, py, tw + 10, 16, 4);
+      else ctx.rect(a.x - tw/2 - 5, py, tw + 10, 16);
       ctx.fill();
       ctx.fillStyle = '#fff';
-      ctx.fillText(label, a.x, py + 11);
+      ctx.fillText(label, a.x, py + 12);
     }
   }
 
@@ -665,6 +770,7 @@
       const next = stepToward(me, currentTarget);
       socket.emit('agent:move', { x: next.x, y: next.y });
       me.x = next.x; me.y = next.y;
+      cancelRepairsIfLeft(next.x, next.y);
     }
   }
 
@@ -776,11 +882,15 @@
 
     socket.on('zone:updated', function(z) {
       zones.set(z.id, z);
-      pendingClaims.delete(z.id); // claim acknowledged by server
+      pendingClaims.delete(z.id);
       refreshZonesList();
       if (z.claimedBy === myId && !myRepairs.has(z.id)) {
         startRepairOverlay(z.id);
         log('Scooby Snacks! Investigating Clue ' + z.severity + ' — hold position!', 'success');
+      } else if (z.claimedBy !== myId && myRepairs.has(z.id)) {
+        // Server cancelled our claim (we moved away)
+        removeRepairOverlay(z.id);
+        log('Zoinks! Lost Clue ' + z.id + ' — moved too far away!', 'warn');
       }
     });
 
@@ -801,6 +911,14 @@
         statScore.textContent = myScore;
         siStreak.textContent  = currentStreak;
         drawChart();
+        
+        floatingSnacks.push({
+          x: z.x,
+          y: z.y - 20,
+          amount: z.severity * 100,
+          startTime: Date.now()
+        });
+
         log('Scooby-Dooby-Doo! Mystery solved! +' + (z.severity * 100) + ' snacks | streak: ' + currentStreak, 'success');
       } else {
         currentStreak = 0;
@@ -824,6 +942,7 @@
     socket.emit('agent:move', { x: x, y: y });
     const me = agents.get(myId);
     if (me) { me.x = x; me.y = y; }
+    cancelRepairsIfLeft(x, y);
     tryClaimAt(x, y);
   });
 
@@ -847,6 +966,7 @@
     const ny = Math.max(0, Math.min(canvas.height, me.y + dy));
     socket.emit('agent:move', { x: nx, y: ny });
     me.x = nx; me.y = ny;
+    cancelRepairsIfLeft(nx, ny);
     tryClaimAt(nx, ny);
   });
 
@@ -857,6 +977,22 @@
         socket.emit('zone:claim', { zoneId: z.id }, function(res) {
           if (res && res.ok) log('On it! Investigating Clue ' + z.severity, 'success');
         });
+      }
+    });
+  }
+
+  // Cancel any active repair overlays where the agent has moved outside the zone radius.
+  function cancelRepairsIfLeft(newX, newY) {
+    myRepairs.forEach(function(entry, zoneId) {
+      const z = zones.get(zoneId);
+      if (!z) { removeRepairOverlay(zoneId); return; }
+      if (Math.hypot(z.x - newX, z.y - newY) > z.radius) {
+        removeRepairOverlay(zoneId);
+        pendingClaims.delete(zoneId);
+        // Clear local claim state so the arc stops drawing immediately.
+        z.claimedBy = null;
+        z.repairStartedAt = null;
+        log('Zoinks! Moved away from Clue ' + z.severity + ' — repair cancelled.', 'warn');
       }
     });
   }
