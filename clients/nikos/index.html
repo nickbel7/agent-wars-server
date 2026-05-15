@@ -6,25 +6,23 @@
   <title>Mystery Inc — Scooby-Doo Wars</title>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Space+Grotesk:wght@400;500;600;700&display=swap');
     :root {
-      /* Mystery Machine teal, Scooby brown night, Shaggy green, Daphne pink */
-      --bg:         #0f0b06; --surface:    #1c1208; --surface2:   #271a0d;
-      --border:     #4a3018; --accent:     #4bb8a8; --accent2:    #c4447a;
-      --danger:     #e53030; --warning:    #e8831b; --success:    #5a8a2c;
-      --auto-on:    #e8831b; --text:       #f5e6c8; --text-muted: #7d6040;
+      --bg:         #f2ede4; --surface:    #ffffff; --surface2:   #f8f4ed;
+      --border:     #ddd0b8; --accent:     #1e9180; --accent2:    #c4447a;
+      --danger:     #cc2828; --warning:    #d96000; --success:    #2d7a18;
+      --auto-on:    #d96000; --text:       #1a1208; --text-muted: #7a6040;
     }
     body {
       background: var(--bg); color: var(--text);
-      font-family: 'Space Grotesk', system-ui, sans-serif;
-      background-image: url('data:image/svg+xml,%3Csvg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M0 0h40v40H0z" fill="none"/%3E%3Ccircle cx="20" cy="20" r="1" fill="rgba(75,184,168,0.04)"/%3E%3C/svg%3E');
+      font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 14px;
       height: 100vh;
       display: grid; grid-template-rows: auto 1fr auto; overflow: hidden;
     }
     header {
       background: var(--surface); border-bottom: 1px solid var(--border);
-      padding: 8px 16px; display: flex; align-items: center; gap: 14px;
-      z-index: 10; flex-wrap: wrap;
+      padding: 10px 18px; display: flex; align-items: center; gap: 16px;
+      z-index: 10; flex-wrap: wrap; box-shadow: 0 1px 4px rgba(0,0,0,.06);
     }
     .logo { display: flex; align-items: center; gap: 8px; white-space: nowrap; cursor: default; }
     .logo img { height: 34px; width: auto; image-rendering: auto; }
@@ -33,97 +31,94 @@
     .logo-text span { color: var(--warning); }
     #join-panel { display: flex; align-items: center; gap: 8px; }
     #join-panel input[type="text"] {
-      font-family: 'Space Grotesk', sans-serif; font-size: 13px;
-      padding: 6px 10px; border-radius: 6px;
-      border: 1px solid var(--border); background: var(--surface2);
-      color: var(--text); outline: none; width: 160px; transition: border-color .2s;
+      font-family: 'Space Grotesk', sans-serif; font-size: 14px;
+      padding: 7px 12px; border-radius: 8px;
+      border: 1.5px solid var(--border); background: var(--surface2);
+      color: var(--text); outline: none; width: 180px; transition: border-color .2s;
     }
     #join-panel input[type="text"]:focus { border-color: var(--accent); }
     .btn {
-      font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 700;
-      padding: 6px 14px; border-radius: 6px; border: none; cursor: pointer;
+      font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600;
+      padding: 7px 16px; border-radius: 8px; border: none; cursor: pointer;
       transition: opacity .2s, transform .1s; white-space: nowrap;
     }
     .btn:hover   { opacity: .85; transform: translateY(-1px); }
     .btn:active  { transform: translateY(0); }
     .btn:disabled{ opacity: .35; cursor: not-allowed; transform: none; }
-    #join-btn { background: var(--accent); color: #000; font-family: 'Fredoka One', cursive; font-size: 13px; letter-spacing: .5px; }
+    #join-btn { background: var(--accent); color: #fff; }
     #auto-btn {
       background: var(--surface2); color: var(--text-muted);
-      border: 1px solid var(--border); display: none;
-      font-family: 'Fredoka One', cursive; font-size: 13px; letter-spacing: .5px;
+      border: 1.5px solid var(--border); display: none;
     }
     #auto-btn.active {
       background: var(--auto-on); color: #fff; border-color: var(--auto-on);
-      box-shadow: 0 0 14px rgba(232,131,27,.5);
     }
-    .keys-hint { font-size: 10px; color: var(--text-muted); display: none; gap: 6px; flex-wrap: wrap; }
+    .keys-hint { font-size: 12px; color: var(--text-muted); display: none; gap: 8px; flex-wrap: wrap; }
     .key {
       background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 4px; padding: 1px 5px; font-family: 'Space Mono', monospace;
+      border-radius: 4px; padding: 1px 6px; font-family: 'Space Grotesk', sans-serif; font-weight: 600;
     }
     .hud { display: flex; align-items: center; gap: 12px; margin-left: auto; }
     .stat { display: flex; flex-direction: column; align-items: center; gap: 1px; min-width: 52px; }
     .stat-value {
-      font-family: 'Fredoka One', cursive; font-size: 18px;
+      font-family: 'Fredoka One', cursive; font-size: 20px;
       color: var(--accent); line-height: 1;
     }
     .stat-value.auto-color { color: var(--auto-on); }
     .stat-value.snack-val { display: flex; align-items: center; gap: 4px; }
-    .snack-icon { width: 16px; height: 16px; object-fit: contain; vertical-align: middle; }
-    .stat-label { font-size: 8px; font-weight: 700; text-transform: uppercase;
-                  letter-spacing: 1px; color: var(--text-muted); }
+    .snack-icon { width: 18px; height: 18px; object-fit: contain; vertical-align: middle; }
+    .stat-label { font-size: 10px; font-weight: 600; text-transform: uppercase;
+                  letter-spacing: .5px; color: var(--text-muted); }
     .stat-divider { width: 1px; height: 28px; background: var(--border); }
     .layout { display: grid; grid-template-columns: 1fr 220px; overflow: hidden; }
     .board-wrapper {
       position: relative; display: flex; align-items: center; justify-content: center;
       background: var(--bg); overflow: auto; padding: 12px;
     }
-    canvas#board { border: 1px solid var(--border); border-radius: 4px; cursor: crosshair; display: block; flex-shrink: 0; }
+    canvas#board { border: 1px solid var(--border); border-radius: 6px; cursor: crosshair; display: block; flex-shrink: 0; box-shadow: 0 2px 12px rgba(0,0,0,.15); }
     .repair-overlay { position: absolute; pointer-events: none; text-align: center; transform: translateX(-50%); }
-    .repair-bar-wrap { background: rgba(0,0,0,.6); border-radius: 8px; overflow: hidden; width: 72px; height: 7px; border: 1px solid var(--warning); }
+    .repair-bar-wrap { background: rgba(0,0,0,.3); border-radius: 8px; overflow: hidden; width: 80px; height: 8px; }
     .repair-bar-fill { height: 100%; background: var(--warning); border-radius: 8px; }
-    .repair-label { font-family: 'Fredoka One', cursive; font-size: 10px; color: var(--warning); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; text-shadow: 0 0 8px var(--warning); }
-    .sidebar { background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
-    .sb-section { padding: 10px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-    .sb-title { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-    .sb-title::after { content:''; flex:1; height:1px; background: var(--border); }
-    canvas#minimap { border: 1px solid var(--border); border-radius: 3px; display: block; width: 100%; height: auto; }
+    .repair-label { font-family: 'Fredoka One', cursive; font-size: 11px; color: #fff; font-weight: 600; margin-top: 3px; }
+    .sidebar { background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; box-shadow: -1px 0 4px rgba(0,0,0,.05); }
+    .sb-section { padding: 10px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .sb-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; }
+    canvas#minimap { border: 1px solid var(--border); border-radius: 4px; display: block; width: 100%; height: auto; }
     #agents-list { display: flex; flex-direction: column; gap: 4px; overflow-y: auto; padding: 10px 12px; max-height: 130px; }
-    .agent-item { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 5px; background: var(--surface2); border: 1px solid var(--border); }
-    .agent-item.is-me { border-color: var(--accent); background: rgba(0,229,255,.04); }
-    .agent-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-    .agent-name { font-size: 11px; font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .agent-badge { font-size: 8px; font-weight: 700; padding: 1px 4px; border-radius: 3px; background: var(--accent); color: #000; text-transform: uppercase; }
+    .agent-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 6px; background: var(--surface2); border: 1px solid var(--border); }
+    .agent-item.is-me { border-color: var(--accent); background: rgba(30,145,128,.06); }
+    .agent-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .agent-name { font-size: 13px; font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .agent-badge { font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 4px; background: var(--accent); color: #fff; text-transform: uppercase; }
     #zones-section { flex-shrink: 0; }
     #zones-list { display: flex; flex-direction: column; gap: 4px; overflow-y: auto; max-height: 110px; padding: 0 12px 8px; }
-    .zone-item { display: flex; align-items: center; justify-content: space-between; padding: 5px 8px; border-radius: 5px; background: var(--surface2); border: 1px solid var(--border); font-size: 10px; }
+    .zone-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; border-radius: 6px; background: var(--surface2); border: 1px solid var(--border); font-size: 12px; }
     .zone-item.active  { border-color: var(--danger); }
     .zone-item.claimed { border-color: var(--warning); }
-    .zone-item.target  { border-color: var(--auto-on); background: rgba(255,107,0,.08); }
-    .zone-sev { font-family: 'Space Mono', monospace; font-weight: 700; padding: 1px 5px; border-radius: 3px; font-size: 9px; }
-    .sev-1 { background: rgba(0,200,100,.2); color: #00cc66; }
-    .sev-2 { background: rgba(200,200,0,.2); color: #cccc00; }
-    .sev-3 { background: rgba(255,160,0,.2); color: #ffaa00; }
-    .sev-4 { background: rgba(255,80,0,.2);  color: #ff5000; }
-    .sev-5 { background: rgba(255,40,40,.2); color: #ff2828; }
-    .zone-status { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
+    .zone-item.target  { border-color: var(--auto-on); background: rgba(217,96,0,.06); }
+    .zone-sev { font-weight: 700; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
+    .sev-1 { background: rgba(0,180,80,.15);  color: #1a8040; }
+    .sev-2 { background: rgba(180,160,0,.15); color: #7a6a00; }
+    .sev-3 { background: rgba(200,120,0,.15); color: #a05000; }
+    .sev-4 { background: rgba(220,60,0,.15);  color: #aa2800; }
+    .sev-5 { background: rgba(200,20,20,.15); color: #aa0000; }
+    .zone-status { font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--text-muted); }
     #stats-section { flex-shrink: 0; }
     #chart-canvas { display: block; width: 100%; height: auto; border: 1px solid var(--border); border-radius: 3px; }
     .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 6px; }
     .stats-mini { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 5px 7px; text-align: center; }
-    .stats-mini-val { font-family: 'Fredoka One', cursive; font-size: 16px; color: var(--accent); }
+    .stats-mini-val { font-family: 'Fredoka One', cursive; font-size: 18px; color: var(--accent); }
     .stats-mini-lbl { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-top: 1px; }
     #log-section { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-    #log { flex: 1; overflow-y: auto; display: flex; flex-direction: column-reverse; gap: 3px; padding: 0 12px 10px; font-family: 'Space Mono', monospace; font-size: 9px; }
-    .log-entry { color: var(--text-muted); line-height: 1.4; }
-    .log-entry.info    { color: #4aa8ff; }
+    #log { flex: 1; overflow-y: auto; display: flex; flex-direction: column-reverse; gap: 3px; padding: 0 14px 10px; font-size: 11px; }
+    .log-entry { color: var(--text-muted); line-height: 1.5; }
+    .log-entry.info    { color: #1a72cc; }
     .log-entry.success { color: var(--success); }
     .log-entry.warn    { color: var(--warning); }
     .log-entry.error   { color: var(--danger); }
     .log-entry.auto    { color: var(--auto-on); }
-    #status-bar { background: var(--surface); border-top: 1px solid var(--border); padding: 3px 14px; font-size: 10px; color: var(--text-muted); font-family: 'Space Mono', monospace; }
-    #status-bar span { color: var(--accent); }
+    #status-bar { background: var(--surface); border-top: 1px solid var(--border); padding: 5px 16px; font-size: 12px; color: var(--text-muted); }
+    #status-bar span { color: var(--accent); font-weight: 600; }
     .conn-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-muted); transition: background .3s; flex-shrink: 0; }
     .conn-dot.connected { background: var(--success); box-shadow: 0 0 6px var(--success); }
     .conn-dot.error     { background: var(--danger); }
@@ -201,8 +196,10 @@
   // Preload Scooby-Doo assets
   const vanImg     = new Image();
   const biscuitImg = new Image();
+  const bgImg      = new Image();
   vanImg.src     = 'assets/scooby-doo-van.png';
   biscuitImg.src = 'assets/scooby-biscuit.png';
+  bgImg.src      = 'assets/scooby-doo-background.png';
   const REPAIR_MS  = 2000;
   const AUTO_HZ    = 10;
   const AUTO_SPEED = 14;
@@ -249,10 +246,12 @@
   let myColor  = '#4bb8a8';
   let joinedAt = null;
 
-  const agents       = new Map();
-  const agentTargets = new Map();
-  const zones        = new Map();
-  const myRepairs    = new Map();
+  const agents        = new Map();
+  const agentTargets  = new Map();
+  const zones         = new Map();
+  const myRepairs     = new Map();
+  const playerNumbers = new Map(); // agentId → display number for other players
+  let   playerCounter = 1;
 
   let myZonesFixed   = 0;
   let myScore        = 0;
@@ -374,12 +373,12 @@
   function drawChart() {
     const W = chartCv.width, H = chartCv.height;
     chartCtx.clearRect(0, 0, W, H);
-    chartCtx.fillStyle = '#0d1117';
+    chartCtx.fillStyle = '#f0ebe0';
     chartCtx.fillRect(0, 0, W, H);
     const last = repairHistory.slice(-10);
     if (!last.length) {
-      chartCtx.fillStyle = 'rgba(107,114,128,.4)';
-      chartCtx.font = '9px Space Mono, monospace';
+      chartCtx.fillStyle = 'rgba(120,96,64,.5)';
+      chartCtx.font = '9px Space Grotesk, sans-serif';
       chartCtx.textAlign = 'center';
       chartCtx.fillText('no mysteries solved yet', W / 2, H / 2 + 3);
       return;
@@ -392,8 +391,8 @@
       chartCtx.fillStyle = sColors[Math.min(5, r.severity)] || '#00cc66';
       chartCtx.fillRect(i * (bw + 2) + 1, H - bh - 1, bw, bh);
     });
-    chartCtx.fillStyle = 'rgba(107,114,128,.5)';
-    chartCtx.font = '8px Space Mono, monospace';
+    chartCtx.fillStyle = 'rgba(120,96,64,.5)';
+    chartCtx.font = '9px Space Grotesk, sans-serif';
     chartCtx.textAlign = 'left';
     chartCtx.fillText('fix time (last 10)', 2, 8);
     const avg = repairHistory.reduce(function(s,r){ return s + r.duration; }, 0) / repairHistory.length;
@@ -411,7 +410,7 @@
 
   function drawMinimap() {
     mCtx.clearRect(0, 0, MM_W, MM_H);
-    mCtx.fillStyle = '#0d1117';
+    mCtx.fillStyle = '#d8cbb8';
     mCtx.fillRect(0, 0, MM_W, MM_H);
     const sColors = ['','#00cc66','#cccc00','#ffaa00','#ff5000','#ff2828'];
     zones.forEach(function(z) {
@@ -462,26 +461,15 @@
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Mystery night background — warm dark brown inspired by haunted settings
-    const bg = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    bg.addColorStop(0, '#140d06');
-    bg.addColorStop(1, '#0a0702');
-    ctx.fillStyle = bg;
+    // Background image + dark overlay for readability
+    if (bgImg.complete && bgImg.naturalWidth > 0) {
+      ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+    } else {
+      ctx.fillStyle = '#c8b898';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.42)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Subtle teal grid (Mystery Machine palette)
-    ctx.strokeStyle = 'rgba(75,184,168,0.08)';
-    ctx.lineWidth = 1;
-    const CELL = 80;
-    for (let x = 0; x <= canvas.width;  x += CELL) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke(); }
-    for (let y = 0; y <= canvas.height; y += CELL) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y);   ctx.stroke(); }
-
-    ctx.fillStyle = 'rgba(75,184,168,0.2)';
-    ctx.font = '8px Space Mono, monospace';
-    ctx.textAlign = 'left';
-    for (let x = CELL; x < canvas.width;  x += CELL*2) ctx.fillText(x, x+2, 10);
-    ctx.textAlign = 'right';
-    for (let y = CELL; y < canvas.height; y += CELL*2) ctx.fillText(y, canvas.width-2, y-2);
 
     const now = Date.now();
 
@@ -578,32 +566,52 @@
 
   function drawAgent(a) {
     const isMe = a.id === myId;
-    // Van dimensions: ~1.75:1 aspect ratio
-    const vW = 100, vH = 58;
 
-    if (vanImg.complete && vanImg.naturalWidth > 0) {
-      ctx.drawImage(vanImg, a.x - vW/2, a.y - vH/2, vW, vH);
-    } else {
-      // Fallback circle until image loads
+    if (isMe) {
+      // My agent: Mystery Machine van
+      const vW = 100, vH = 58;
+      if (vanImg.complete && vanImg.naturalWidth > 0) {
+        ctx.drawImage(vanImg, a.x - vW/2, a.y - vH/2, vW, vH);
+      } else {
+        ctx.beginPath();
+        ctx.arc(a.x, a.y, 24, 0, Math.PI * 2);
+        ctx.fillStyle = '#1e9180';
+        ctx.fill();
+      }
+      const label = '\u00BB ' + a.name;
+      ctx.font = 'bold 13px Fredoka One, cursive';
+      ctx.textAlign = 'center';
+      const tw = ctx.measureText(label).width;
+      const py = a.y - vH/2 - 22;
+      ctx.fillStyle = 'rgba(0,0,0,.72)';
       ctx.beginPath();
-      ctx.arc(a.x, a.y, 24, 0, Math.PI * 2);
-      ctx.fillStyle = '#4bb8a8';
+      if (ctx.roundRect) ctx.roundRect(a.x - tw/2 - 6, py, tw + 12, 17, 4);
+      else ctx.rect(a.x - tw/2 - 6, py, tw + 12, 17);
       ctx.fill();
+      ctx.fillStyle = '#5ee8d6';
+      ctx.fillText(label, a.x, py + 12);
+    } else {
+      // Other agents: simple coloured circle
+      if (!playerNumbers.has(a.id)) { playerNumbers.set(a.id, playerCounter++); }
+      const num = playerNumbers.get(a.id);
+      const r = 14;
+      ctx.beginPath();
+      ctx.arc(a.x, a.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = a.color || '#888';
+      ctx.fill();
+      const label = 'Player ' + num;
+      ctx.font = '12px Space Grotesk, sans-serif';
+      ctx.textAlign = 'center';
+      const tw = ctx.measureText(label).width;
+      const py = a.y - r - 18;
+      ctx.fillStyle = 'rgba(0,0,0,.65)';
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(a.x - tw/2 - 5, py, tw + 10, 15, 3);
+      else ctx.rect(a.x - tw/2 - 5, py, tw + 10, 15);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.fillText(label, a.x, py + 11);
     }
-
-    // Agent name label above van
-    const label = isMe ? ('\u00BB ' + a.name) : a.name;
-    ctx.font = (isMe ? 'bold ' : '') + '11px Fredoka One, cursive';
-    ctx.textAlign = 'center';
-    const tw = ctx.measureText(label).width;
-    const py = a.y - vH/2 - 18;
-    ctx.fillStyle = 'rgba(15,11,6,.88)';
-    ctx.beginPath();
-    if (ctx.roundRect) ctx.roundRect(a.x - tw/2 - 5, py, tw + 10, 15, 3);
-    else ctx.rect(a.x - tw/2 - 5, py, tw + 10, 15);
-    ctx.fill();
-    ctx.fillStyle = isMe ? '#4bb8a8' : '#c8b89a';
-    ctx.fillText(label, a.x, py + 11);
   }
 
   // ===========================================================================
@@ -755,6 +763,7 @@
       if (a) log('Van left the scene: ' + a.name, 'warn');
       agents.delete(data.id);
       agentTargets.delete(data.id);
+      playerNumbers.delete(data.id);
       refreshAgentsList();
     });
 
