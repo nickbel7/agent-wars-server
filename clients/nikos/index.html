@@ -5,1044 +5,845 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Agent Wars — Nikos Client</title>
   <style>
-    /* ======== Reset & Fonts ================================================ */
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
     @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
-
     :root {
-      --bg:          #0a0c0f;
-      --surface:     #111318;
-      --surface2:    #1a1d24;
-      --border:      #2a2d35;
-      --accent:      #00e5ff;
-      --accent2:     #7c3aed;
-      --danger:      #ff4444;
-      --warning:     #ffaa00;
-      --success:     #00cc66;
-      --text:        #e8eaf0;
-      --text-muted:  #6b7280;
-      --agent-size:  40px;
+      --bg:         #0a0c0f; --surface:    #111318; --surface2:   #1a1d24;
+      --border:     #2a2d35; --accent:     #00e5ff; --accent2:    #7c3aed;
+      --danger:     #ff4444; --warning:    #ffaa00; --success:    #00cc66;
+      --auto-on:    #ff6b00; --text:       #e8eaf0; --text-muted: #6b7280;
     }
-
     body {
-      background: var(--bg);
-      color: var(--text);
+      background: var(--bg); color: var(--text);
       font-family: 'Space Grotesk', system-ui, sans-serif;
-      min-height: 100vh;
-      display: grid;
-      grid-template-rows: auto 1fr;
-      overflow: hidden;
+      height: 100vh;
+      display: grid; grid-template-rows: auto 1fr auto; overflow: hidden;
     }
-
-    /* ======== Header / HUD ================================================= */
     header {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 10px 20px;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      z-index: 10;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 8px 16px; display: flex; align-items: center; gap: 14px;
+      z-index: 10; flex-wrap: wrap;
     }
-
-    .logo {
-      font-family: 'Space Mono', monospace;
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--accent);
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-
+    .logo { font-family: 'Space Mono', monospace; font-size: 13px; font-weight: 700;
+            color: var(--accent); letter-spacing: 2px; white-space: nowrap; }
     .logo span { color: var(--text-muted); }
-
-    #join-panel {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex: 1;
-    }
-
+    #join-panel { display: flex; align-items: center; gap: 8px; }
     #join-panel input[type="text"] {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 13px;
-      padding: 7px 12px;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-      background: var(--surface2);
-      color: var(--text);
-      outline: none;
-      width: 180px;
-      transition: border-color 0.2s;
+      font-family: 'Space Grotesk', sans-serif; font-size: 13px;
+      padding: 6px 10px; border-radius: 6px;
+      border: 1px solid var(--border); background: var(--surface2);
+      color: var(--text); outline: none; width: 160px; transition: border-color .2s;
     }
-
-    #join-panel input[type="text"]:focus {
-      border-color: var(--accent);
-    }
-
+    #join-panel input[type="text"]:focus { border-color: var(--accent); }
     #join-panel input[type="color"] {
-      width: 36px;
-      height: 32px;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-      background: var(--surface2);
-      cursor: pointer;
-      padding: 2px;
+      width: 32px; height: 30px; border-radius: 5px;
+      border: 1px solid var(--border); background: var(--surface2);
+      cursor: pointer; padding: 2px;
     }
-
-    #join-btn {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      padding: 7px 18px;
-      border-radius: 6px;
-      border: none;
-      background: var(--accent);
-      color: #000;
-      cursor: pointer;
-      transition: opacity 0.2s, transform 0.1s;
-      white-space: nowrap;
+    .btn {
+      font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 700;
+      padding: 6px 14px; border-radius: 6px; border: none; cursor: pointer;
+      transition: opacity .2s, transform .1s; white-space: nowrap;
     }
-    #join-btn:hover { opacity: 0.85; transform: translateY(-1px); }
-    #join-btn:active { transform: translateY(0); }
-    #join-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    /* ======== Stats HUD ==================================================== */
-    .hud {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-left: auto;
+    .btn:hover   { opacity: .85; transform: translateY(-1px); }
+    .btn:active  { transform: translateY(0); }
+    .btn:disabled{ opacity: .35; cursor: not-allowed; transform: none; }
+    #join-btn { background: var(--accent); color: #000; }
+    #auto-btn {
+      background: var(--surface2); color: var(--text-muted);
+      border: 1px solid var(--border); display: none;
     }
-
-    .stat {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-      min-width: 60px;
+    #auto-btn.active {
+      background: var(--auto-on); color: #fff; border-color: var(--auto-on);
+      box-shadow: 0 0 12px rgba(255,107,0,.4);
     }
-
+    .keys-hint { font-size: 10px; color: var(--text-muted); display: none; gap: 6px; flex-wrap: wrap; }
+    .key {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 4px; padding: 1px 5px; font-family: 'Space Mono', monospace;
+    }
+    .hud { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+    .stat { display: flex; flex-direction: column; align-items: center; gap: 1px; min-width: 52px; }
     .stat-value {
-      font-family: 'Space Mono', monospace;
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--accent);
-      line-height: 1;
+      font-family: 'Space Mono', monospace; font-size: 16px; font-weight: 700;
+      color: var(--accent); line-height: 1;
     }
-
-    .stat-label {
-      font-size: 9px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--text-muted);
-    }
-
-    .stat-divider {
-      width: 1px;
-      height: 32px;
-      background: var(--border);
-    }
-
-    /* ======== Layout ======================================================= */
-    .layout {
-      display: grid;
-      grid-template-columns: 1fr 240px;
-      overflow: hidden;
-      height: calc(100vh - 54px);
-    }
-
-    /* ======== Board area =================================================== */
+    .stat-value.auto-color { color: var(--auto-on); }
+    .stat-label { font-size: 8px; font-weight: 700; text-transform: uppercase;
+                  letter-spacing: 1px; color: var(--text-muted); }
+    .stat-divider { width: 1px; height: 28px; background: var(--border); }
+    .layout { display: grid; grid-template-columns: 1fr 220px; overflow: hidden; }
     .board-wrapper {
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--bg);
-      overflow: auto;
-      padding: 16px;
+      position: relative; display: flex; align-items: center; justify-content: center;
+      background: var(--bg); overflow: auto; padding: 12px;
     }
-
-    canvas {
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      cursor: crosshair;
-      display: block;
-      flex-shrink: 0;
-    }
-
-    /* Repair progress overlay (injected dynamically, positioned via JS) */
-    .repair-overlay {
-      position: absolute;
-      pointer-events: none;
-      text-align: center;
-      transform: translateX(-50%);
-    }
-
-    .repair-bar-wrap {
-      background: rgba(0,0,0,0.6);
-      border-radius: 8px;
-      overflow: hidden;
-      width: 80px;
-      height: 8px;
-      border: 1px solid var(--accent);
-    }
-
-    .repair-bar-fill {
-      height: 100%;
-      background: var(--accent);
-      border-radius: 8px;
-      transition: width 0.1s linear;
-    }
-
-    .repair-label {
-      font-size: 9px;
-      font-weight: 700;
-      color: var(--accent);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-top: 2px;
-      text-shadow: 0 0 6px var(--accent);
-    }
-
-    /* ======== Sidebar ====================================================== */
-    .sidebar {
-      background: var(--surface);
-      border-left: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .sidebar-section {
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .sidebar-title {
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      color: var(--text-muted);
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .sidebar-title::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-
-    /* Agents list */
-    #agents-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      overflow-y: auto;
-      flex: 1;
-      padding: 14px 16px;
-    }
-
-    .agent-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 7px 10px;
-      border-radius: 6px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      transition: border-color 0.2s;
-    }
-
-    .agent-item.is-me {
-      border-color: var(--accent);
-      background: rgba(0, 229, 255, 0.04);
-    }
-
-    .agent-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    .agent-name {
-      font-size: 12px;
-      font-weight: 500;
-      flex: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .agent-badge {
-      font-size: 9px;
-      font-weight: 700;
-      padding: 2px 5px;
-      border-radius: 4px;
-      background: var(--accent);
-      color: #000;
-      text-transform: uppercase;
-    }
-
-    /* Zones list */
-    #zones-section {
-      border-bottom: 1px solid var(--border);
-      padding: 14px 16px;
-      max-height: 220px;
-      overflow-y: auto;
-    }
-
-    #zones-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-top: 0;
-    }
-
-    .zone-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 6px 10px;
-      border-radius: 6px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      font-size: 11px;
-    }
-
-    .zone-item.active { border-color: var(--danger); }
+    canvas#board { border: 1px solid var(--border); border-radius: 4px; cursor: crosshair; display: block; flex-shrink: 0; }
+    .repair-overlay { position: absolute; pointer-events: none; text-align: center; transform: translateX(-50%); }
+    .repair-bar-wrap { background: rgba(0,0,0,.6); border-radius: 8px; overflow: hidden; width: 72px; height: 7px; border: 1px solid var(--accent); }
+    .repair-bar-fill { height: 100%; background: var(--accent); border-radius: 8px; }
+    .repair-label { font-size: 9px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; text-shadow: 0 0 6px var(--accent); }
+    .sidebar { background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+    .sb-section { padding: 10px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .sb-title { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .sb-title::after { content:''; flex:1; height:1px; background: var(--border); }
+    canvas#minimap { border: 1px solid var(--border); border-radius: 3px; display: block; width: 100%; height: auto; }
+    #agents-list { display: flex; flex-direction: column; gap: 4px; overflow-y: auto; padding: 10px 12px; max-height: 130px; }
+    .agent-item { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 5px; background: var(--surface2); border: 1px solid var(--border); }
+    .agent-item.is-me { border-color: var(--accent); background: rgba(0,229,255,.04); }
+    .agent-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .agent-name { font-size: 11px; font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .agent-badge { font-size: 8px; font-weight: 700; padding: 1px 4px; border-radius: 3px; background: var(--accent); color: #000; text-transform: uppercase; }
+    #zones-section { flex-shrink: 0; }
+    #zones-list { display: flex; flex-direction: column; gap: 4px; overflow-y: auto; max-height: 110px; padding: 0 12px 8px; }
+    .zone-item { display: flex; align-items: center; justify-content: space-between; padding: 5px 8px; border-radius: 5px; background: var(--surface2); border: 1px solid var(--border); font-size: 10px; }
+    .zone-item.active  { border-color: var(--danger); }
     .zone-item.claimed { border-color: var(--warning); }
-    .zone-item.resolved { border-color: var(--success); opacity: 0.5; }
-
-    .zone-sev {
-      font-family: 'Space Mono', monospace;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 10px;
-    }
-
-    .sev-1 { background: rgba(0,200,100,0.2); color: #00cc66; }
-    .sev-2 { background: rgba(200,200,0,0.2); color: #cccc00; }
-    .sev-3 { background: rgba(255,160,0,0.2); color: #ffaa00; }
-    .sev-4 { background: rgba(255,80,0,0.2); color: #ff5000; }
-    .sev-5 { background: rgba(255,40,40,0.2); color: #ff2828; }
-
-    .zone-status {
-      font-size: 9px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--text-muted);
-    }
-
-    /* Log */
-    #log-section {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      padding: 14px 16px;
-    }
-
-    #log {
-      flex: 1;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column-reverse;
-      gap: 4px;
-      font-family: 'Space Mono', monospace;
-      font-size: 10px;
-    }
-
-    .log-entry {
-      color: var(--text-muted);
-      line-height: 1.4;
-    }
-    .log-entry.info  { color: #4aa8ff; }
+    .zone-item.target  { border-color: var(--auto-on); background: rgba(255,107,0,.08); }
+    .zone-sev { font-family: 'Space Mono', monospace; font-weight: 700; padding: 1px 5px; border-radius: 3px; font-size: 9px; }
+    .sev-1 { background: rgba(0,200,100,.2); color: #00cc66; }
+    .sev-2 { background: rgba(200,200,0,.2); color: #cccc00; }
+    .sev-3 { background: rgba(255,160,0,.2); color: #ffaa00; }
+    .sev-4 { background: rgba(255,80,0,.2);  color: #ff5000; }
+    .sev-5 { background: rgba(255,40,40,.2); color: #ff2828; }
+    .zone-status { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
+    #stats-section { flex-shrink: 0; }
+    #chart-canvas { display: block; width: 100%; height: auto; border: 1px solid var(--border); border-radius: 3px; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 6px; }
+    .stats-mini { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 5px 7px; text-align: center; }
+    .stats-mini-val { font-family: 'Space Mono', monospace; font-size: 14px; font-weight: 700; color: var(--accent); }
+    .stats-mini-lbl { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-top: 1px; }
+    #log-section { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    #log { flex: 1; overflow-y: auto; display: flex; flex-direction: column-reverse; gap: 3px; padding: 0 12px 10px; font-family: 'Space Mono', monospace; font-size: 9px; }
+    .log-entry { color: var(--text-muted); line-height: 1.4; }
+    .log-entry.info    { color: #4aa8ff; }
     .log-entry.success { color: var(--success); }
-    .log-entry.warn  { color: var(--warning); }
-    .log-entry.error { color: var(--danger); }
-
-    /* ======== Status bar =================================================== */
-    #status-bar {
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      padding: 4px 16px;
-      font-size: 11px;
-      color: var(--text-muted);
-      font-family: 'Space Mono', monospace;
-      grid-column: 1 / -1;
-    }
-
+    .log-entry.warn    { color: var(--warning); }
+    .log-entry.error   { color: var(--danger); }
+    .log-entry.auto    { color: var(--auto-on); }
+    #status-bar { background: var(--surface); border-top: 1px solid var(--border); padding: 3px 14px; font-size: 10px; color: var(--text-muted); font-family: 'Space Mono', monospace; }
     #status-bar span { color: var(--accent); }
-
-    /* ======== Connection dot =============================================== */
-    .conn-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--text-muted);
-      transition: background 0.3s;
-      flex-shrink: 0;
-    }
+    .conn-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-muted); transition: background .3s; flex-shrink: 0; }
     .conn-dot.connected { background: var(--success); box-shadow: 0 0 6px var(--success); }
     .conn-dot.error     { background: var(--danger); }
-
-    /* ======== Keyboard hint ================================================ */
-    .keys-hint {
-      font-size: 10px;
-      color: var(--text-muted);
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .key {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 1px 5px;
-      font-family: 'Space Mono', monospace;
-    }
   </style>
 </head>
 <body>
-
-  <!-- ===== Header ========================================================= -->
   <header>
     <div class="logo">AGENT<span>/</span>WARS</div>
-
     <div id="join-panel">
       <div class="conn-dot" id="conn-dot"></div>
-      <input id="name-input" type="text" placeholder="Enter your name…" maxlength="30" autofocus />
-      <input id="color-input" type="color" value="#00e5ff" title="Agent color" />
-      <button id="join-btn" type="button">Join Board</button>
-      <div class="keys-hint" id="keys-hint" style="display:none">
-        <span><span class="key">Click</span> move</span>
-        <span><span class="key">Shift+Click</span> claim zone</span>
-        <span><span class="key">Arrow keys</span> nudge</span>
-      </div>
+      <input id="name-input" type="text" placeholder="Your name..." maxlength="30" autofocus />
+      <input id="color-input" type="color" value="#00e5ff" />
+      <button id="join-btn" class="btn" type="button">Join Board</button>
+      <button id="auto-btn" class="btn" type="button">&#9889; AUTO</button>
     </div>
-
+    <div class="keys-hint" id="keys-hint">
+      <span><span class="key">Click</span> move</span>
+      <span><span class="key">Arrow keys</span> nudge</span>
+      <span><span class="key">A</span> toggle auto</span>
+    </div>
     <div class="hud">
-      <div class="stat">
-        <div class="stat-value" id="stat-score">0</div>
-        <div class="stat-label">Score</div>
-      </div>
+      <div class="stat"><div class="stat-value" id="stat-score">0</div><div class="stat-label">Score</div></div>
       <div class="stat-divider"></div>
-      <div class="stat">
-        <div class="stat-value" id="stat-zones">0</div>
-        <div class="stat-label">Zones Fixed</div>
-      </div>
+      <div class="stat"><div class="stat-value" id="stat-zones">0</div><div class="stat-label">Zones Fixed</div></div>
       <div class="stat-divider"></div>
-      <div class="stat">
-        <div class="stat-value" id="stat-time">0:00</div>
-        <div class="stat-label">Time</div>
-      </div>
+      <div class="stat"><div class="stat-value" id="stat-zpm">0.0</div><div class="stat-label">Zones/min</div></div>
       <div class="stat-divider"></div>
-      <div class="stat">
-        <div class="stat-value" id="stat-agents">0</div>
-        <div class="stat-label">Agents</div>
-      </div>
+      <div class="stat"><div class="stat-value" id="stat-time">0:00</div><div class="stat-label">Time</div></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><div class="stat-value" id="stat-agents">0</div><div class="stat-label">Agents</div></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><div class="stat-value auto-color" id="stat-mode">OFF</div><div class="stat-label">Auto Mode</div></div>
     </div>
   </header>
 
-  <!-- ===== Main layout ==================================================== -->
   <div class="layout">
-    <!-- Board -->
     <div class="board-wrapper" id="board-wrapper">
       <canvas id="board" width="1200" height="800"></canvas>
     </div>
-
-    <!-- Sidebar -->
     <div class="sidebar">
-      <div class="sidebar-section">
-        <div class="sidebar-title">Agents online</div>
+      <div class="sb-section">
+        <div class="sb-title">Mini-map</div>
+        <canvas id="minimap" width="196" height="131"></canvas>
       </div>
+      <div class="sb-section" style="padding-bottom:0"><div class="sb-title">Agents online</div></div>
       <div id="agents-list"></div>
-
-      <div id="zones-section">
-        <div class="sidebar-title">Active zones</div>
-        <div id="zones-list"></div>
+      <div class="sb-section" id="zones-section" style="padding-bottom:4px"><div class="sb-title">Active zones</div></div>
+      <div id="zones-list"></div>
+      <div class="sb-section" id="stats-section">
+        <div class="sb-title">Performance</div>
+        <canvas id="chart-canvas" width="196" height="50"></canvas>
+        <div class="stats-grid">
+          <div class="stats-mini"><div class="stats-mini-val" id="si-streak">0</div><div class="stats-mini-lbl">Streak</div></div>
+          <div class="stats-mini"><div class="stats-mini-val" id="si-avg">--</div><div class="stats-mini-lbl">Avg fix (s)</div></div>
+        </div>
       </div>
-
-      <div id="log-section">
-        <div class="sidebar-title">Event log</div>
+      <div id="log-section" class="sb-section" style="flex:1;overflow:hidden;border:none;padding-bottom:0">
+        <div class="sb-title">Event log</div>
         <div id="log"></div>
       </div>
     </div>
   </div>
 
-  <!-- ===== Status bar ===================================================== -->
-  <div id="status-bar">ready — enter your name and click <span>Join Board</span></div>
+  <div id="status-bar">ready -- enter your name and click <span>Join Board</span></div>
 
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script>
-    // =========================================================================
-    // CONFIG
-    // =========================================================================
-    const SERVER       = 'https://agent-wars-server-ujkj.onrender.com';
-    const REPAIR_MS    = 2000;
-    const AGENT_RADIUS = 20;   // half of 40px default size
+  // ===========================================================================
+  // CONFIG
+  // ===========================================================================
+  const SERVER     = 'https://agent-wars-server-ujkj.onrender.com';
+  const REPAIR_MS  = 2000;
+  const AUTO_HZ    = 10;
+  const AUTO_SPEED = 14;
+  const LERP       = 0.18;
+  const W_SEV      =  220;
+  const W_DIST     = -0.45;
+  const W_CONT     = -1200;
 
-    // =========================================================================
-    // DOM REFS
-    // =========================================================================
-    const canvas      = document.getElementById('board');
-    const ctx         = canvas.getContext('2d');
-    const nameIn      = document.getElementById('name-input');
-    const colorIn     = document.getElementById('color-input');
-    const joinBtn     = document.getElementById('join-btn');
-    const connDot     = document.getElementById('conn-dot');
-    const statusBar   = document.getElementById('status-bar');
-    const keysHint    = document.getElementById('keys-hint');
-    const agentsList  = document.getElementById('agents-list');
-    const zonesList   = document.getElementById('zones-list');
-    const logEl       = document.getElementById('log');
-    const statScore   = document.getElementById('stat-score');
-    const statZones   = document.getElementById('stat-zones');
-    const statTime    = document.getElementById('stat-time');
-    const statAgents  = document.getElementById('stat-agents');
-    const boardWrap   = document.getElementById('board-wrapper');
+  // ===========================================================================
+  // DOM
+  // ===========================================================================
+  const canvas     = document.getElementById('board');
+  const ctx        = canvas.getContext('2d');
+  const minimap    = document.getElementById('minimap');
+  const mCtx       = minimap.getContext('2d');
+  const chartCv    = document.getElementById('chart-canvas');
+  const chartCtx   = chartCv.getContext('2d');
+  const nameIn     = document.getElementById('name-input');
+  const colorIn    = document.getElementById('color-input');
+  const joinBtn    = document.getElementById('join-btn');
+  const autoBtn    = document.getElementById('auto-btn');
+  const connDot    = document.getElementById('conn-dot');
+  const statusBar  = document.getElementById('status-bar');
+  const keysHint   = document.getElementById('keys-hint');
+  const agentsList = document.getElementById('agents-list');
+  const zonesList  = document.getElementById('zones-list');
+  const logEl      = document.getElementById('log');
+  const boardWrap  = document.getElementById('board-wrapper');
+  const statScore  = document.getElementById('stat-score');
+  const statZones  = document.getElementById('stat-zones');
+  const statZpm    = document.getElementById('stat-zpm');
+  const statTime   = document.getElementById('stat-time');
+  const statAgents = document.getElementById('stat-agents');
+  const statMode   = document.getElementById('stat-mode');
+  const siStreak   = document.getElementById('si-streak');
+  const siAvg      = document.getElementById('si-avg');
 
-    // =========================================================================
-    // STATE
-    // =========================================================================
-    let socket        = null;
-    let myId          = null;
-    let myName        = '';
-    let myColor       = '#00e5ff';
-    let joinedAt      = null;
+  // ===========================================================================
+  // STATE
+  // ===========================================================================
+  let socket   = null;
+  let myId     = null;
+  let myName   = '';
+  let myColor  = '#00e5ff';
+  let joinedAt = null;
 
-    const agents      = new Map();   // id → Agent
-    const zones       = new Map();   // id → Zone
+  const agents       = new Map();
+  const agentTargets = new Map();
+  const zones        = new Map();
+  const myRepairs    = new Map();
 
-    // Repair tracking for OUR zone claims
-    // key = zoneId, value = { startedAt: timestamp, progressEl: HTMLElement }
-    const myRepairs   = new Map();
+  let myZonesFixed   = 0;
+  let myScore        = 0;
+  let currentStreak  = 0;
+  let longestStreak  = 0;
+  const repairHistory = [];
 
-    // My personal stats
-    let myZonesFixed  = 0;
-    let myScore       = 0;
+  let autoMode      = false;
+  let autoInterval  = null;
+  let currentTarget = null;
 
-    // =========================================================================
-    // LOGGING
-    // =========================================================================
-    function log(msg, type = '') {
-      const el = document.createElement('div');
-      el.className = `log-entry ${type}`;
-      const ts = new Date().toLocaleTimeString('en', { hour12: false, hour:'2-digit', minute:'2-digit', second:'2-digit' });
-      el.textContent = `[${ts}] ${msg}`;
-      logEl.prepend(el);
-      // Keep log bounded
-      while (logEl.children.length > 80) logEl.removeChild(logEl.lastChild);
+  // ===========================================================================
+  // LOGGING
+  // ===========================================================================
+  function log(msg, type) {
+    type = type || '';
+    const el = document.createElement('div');
+    el.className = 'log-entry ' + type;
+    const ts = new Date().toLocaleTimeString('en', { hour12: false });
+    el.textContent = '[' + ts + '] ' + msg;
+    logEl.prepend(el);
+    while (logEl.children.length > 100) logEl.removeChild(logEl.lastChild);
+  }
+
+  // ===========================================================================
+  // TIMER
+  // ===========================================================================
+  function updateTimer() {
+    if (!joinedAt) return;
+    const sec = Math.floor((Date.now() - joinedAt) / 1000);
+    const m = Math.floor(sec / 60), s = sec % 60;
+    statTime.textContent = m + ':' + String(s).padStart(2, '0');
+    const now = Date.now();
+    const recent = repairHistory.filter(function(r){ return now - r.resolvedAt < 60000; });
+    statZpm.textContent = recent.length.toFixed(1);
+  }
+  setInterval(updateTimer, 1000);
+
+  // ===========================================================================
+  // SIDEBAR
+  // ===========================================================================
+  function refreshAgentsList() {
+    agentsList.innerHTML = '';
+    statAgents.textContent = agents.size;
+    agents.forEach(function(a) {
+      const item = document.createElement('div');
+      item.className = 'agent-item' + (a.id === myId ? ' is-me' : '');
+      item.innerHTML =
+        '<div class="agent-dot" style="background:' + (a.color || '#888') + '"></div>' +
+        '<div class="agent-name">' + esc(a.name) + '</div>' +
+        (a.id === myId ? '<div class="agent-badge">You</div>' : '');
+      agentsList.appendChild(item);
+    });
+  }
+
+  function refreshZonesList() {
+    zonesList.innerHTML = '';
+    const active = [];
+    zones.forEach(function(z){ if (z.status !== 'resolved') active.push(z); });
+    if (!active.length) {
+      zonesList.innerHTML = '<div style="font-size:10px;color:var(--text-muted);padding:2px 12px 8px">No active zones</div>';
+      return;
     }
+    active.forEach(function(z) {
+      const isTarget = currentTarget && currentTarget.id === z.id;
+      const cls = isTarget ? 'zone-item target' : (z.claimedBy ? 'zone-item claimed' : 'zone-item active');
+      const sevCls = 'sev-' + Math.min(5, Math.max(1, z.severity));
+      const statusTxt = isTarget ? '&#9889; TARGET' : (z.claimedBy ? 'repairing' : 'active');
+      const item = document.createElement('div');
+      item.className = cls;
+      item.innerHTML = '<span class="zone-sev ' + sevCls + '">SEV ' + z.severity + '</span><span class="zone-status">' + statusTxt + '</span>';
+      zonesList.appendChild(item);
+    });
+  }
 
-    // =========================================================================
-    // TIMER
-    // =========================================================================
-    function updateTimer() {
-      if (!joinedAt) return;
-      const elapsed = Math.floor((Date.now() - joinedAt) / 1000);
-      const m = Math.floor(elapsed / 60);
-      const s = elapsed % 60;
-      statTime.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ===========================================================================
+  // REPAIR OVERLAY
+  // ===========================================================================
+  function startRepairOverlay(zoneId) {
+    const z = zones.get(zoneId);
+    if (!z || myRepairs.has(zoneId)) return;
+    const overlay = document.createElement('div');
+    overlay.className = 'repair-overlay';
+    overlay.dataset.zoneId = zoneId;
+    overlay.innerHTML = '<div class="repair-bar-wrap"><div class="repair-bar-fill" style="width:0%"></div></div><div class="repair-label">repairing</div>';
+    boardWrap.appendChild(overlay);
+    const startedAt = Date.now();
+    myRepairs.set(zoneId, { startedAt: startedAt, overlay: overlay });
+    function tick() {
+      if (!myRepairs.has(zoneId)) return;
+      const pct = Math.min(100, ((Date.now() - startedAt) / REPAIR_MS) * 100);
+      overlay.querySelector('.repair-bar-fill').style.width = pct + '%';
+      positionOverlay(overlay, z.x, z.y + z.radius + 14);
+      if (pct < 100) requestAnimationFrame(tick);
     }
-    setInterval(updateTimer, 1000);
+    requestAnimationFrame(tick);
+  }
 
-    // =========================================================================
-    // SIDEBAR UPDATES
-    // =========================================================================
-    function refreshAgentsList() {
-      agentsList.innerHTML = '';
-      statAgents.textContent = agents.size;
-      for (const a of agents.values()) {
-        const item = document.createElement('div');
-        item.className = `agent-item${a.id === myId ? ' is-me' : ''}`;
-        item.innerHTML = `
-          <div class="agent-dot" style="background:${a.color || '#888'}"></div>
-          <div class="agent-name">${escHtml(a.name)}</div>
-          ${a.id === myId ? '<div class="agent-badge">You</div>' : ''}
-        `;
-        agentsList.appendChild(item);
-      }
+  function positionOverlay(el, bx, by) {
+    const cr = canvas.getBoundingClientRect();
+    const wr = boardWrap.getBoundingClientRect();
+    el.style.left = (cr.left - wr.left + bx * (cr.width / canvas.width)) + 'px';
+    el.style.top  = (cr.top  - wr.top  + by * (cr.height / canvas.height)) + 'px';
+  }
+
+  function removeRepairOverlay(zoneId) {
+    const e = myRepairs.get(zoneId);
+    if (e) { e.overlay.remove(); myRepairs.delete(zoneId); }
+  }
+
+  // ===========================================================================
+  // PERFORMANCE CHART
+  // ===========================================================================
+  function drawChart() {
+    const W = chartCv.width, H = chartCv.height;
+    chartCtx.clearRect(0, 0, W, H);
+    chartCtx.fillStyle = '#0d1117';
+    chartCtx.fillRect(0, 0, W, H);
+    const last = repairHistory.slice(-10);
+    if (!last.length) {
+      chartCtx.fillStyle = 'rgba(107,114,128,.4)';
+      chartCtx.font = '9px Space Mono, monospace';
+      chartCtx.textAlign = 'center';
+      chartCtx.fillText('no repairs yet', W / 2, H / 2 + 3);
+      return;
     }
+    const maxDur = Math.max.apply(null, last.map(function(r){ return r.duration; }).concat([REPAIR_MS]));
+    const bw = Math.floor(W / last.length) - 2;
+    const sColors = ['','#00cc66','#cccc00','#ffaa00','#ff5000','#ff2828'];
+    last.forEach(function(r, i) {
+      const bh = Math.max(3, Math.round((r.duration / maxDur) * (H - 12)));
+      chartCtx.fillStyle = sColors[Math.min(5, r.severity)] || '#00cc66';
+      chartCtx.fillRect(i * (bw + 2) + 1, H - bh - 1, bw, bh);
+    });
+    chartCtx.fillStyle = 'rgba(107,114,128,.5)';
+    chartCtx.font = '8px Space Mono, monospace';
+    chartCtx.textAlign = 'left';
+    chartCtx.fillText('fix time (last 10)', 2, 8);
+    const avg = repairHistory.reduce(function(s,r){ return s + r.duration; }, 0) / repairHistory.length;
+    siAvg.textContent    = (avg / 1000).toFixed(1);
+    siStreak.textContent = currentStreak;
+  }
 
-    function refreshZonesList() {
-      zonesList.innerHTML = '';
-      const activeZones = [...zones.values()].filter(z => z.status !== 'resolved');
-      if (activeZones.length === 0) {
-        zonesList.innerHTML = '<div style="font-size:11px;color:var(--text-muted);padding:4px 0">No active zones</div>';
-        return;
-      }
-      for (const z of activeZones) {
-        const item = document.createElement('div');
-        const claimed = z.claimedBy ? 'claimed' : 'active';
-        item.className = `zone-item ${z.status === 'resolved' ? 'resolved' : claimed}`;
-        const sevClass = `sev-${Math.min(5, Math.max(1, z.severity))}`;
-        const statusText = z.status === 'resolved' ? 'resolved' : (z.claimedBy ? 'repairing' : 'active');
-        item.innerHTML = `
-          <span class="zone-sev ${sevClass}">SEV ${z.severity}</span>
-          <span class="zone-status">${statusText}</span>
-        `;
-        zonesList.appendChild(item);
-      }
+  // ===========================================================================
+  // MINI-MAP
+  // ===========================================================================
+  const MM_W = minimap.width;
+  const MM_H = minimap.height;
+  const MM_SX = MM_W / 1200;
+  const MM_SY = MM_H / 800;
+
+  function drawMinimap() {
+    mCtx.clearRect(0, 0, MM_W, MM_H);
+    mCtx.fillStyle = '#0d1117';
+    mCtx.fillRect(0, 0, MM_W, MM_H);
+    const sColors = ['','#00cc66','#cccc00','#ffaa00','#ff5000','#ff2828'];
+    zones.forEach(function(z) {
+      if (z.status === 'resolved') return;
+      const r = Math.max(3, z.radius * MM_SX);
+      const c = sColors[Math.min(5, z.severity)];
+      mCtx.beginPath();
+      mCtx.arc(z.x * MM_SX, z.y * MM_SY, r, 0, Math.PI * 2);
+      mCtx.fillStyle = c + '33';
+      mCtx.fill();
+      mCtx.strokeStyle = c;
+      mCtx.lineWidth = 1;
+      mCtx.stroke();
+    });
+    if (currentTarget && autoMode) {
+      mCtx.beginPath();
+      mCtx.arc(currentTarget.x * MM_SX, currentTarget.y * MM_SY, Math.max(4, currentTarget.radius * MM_SX) + 2, 0, Math.PI * 2);
+      mCtx.strokeStyle = 'rgba(255,107,0,.9)';
+      mCtx.lineWidth = 2;
+      mCtx.stroke();
     }
-
-    function escHtml(s) {
-      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
-
-    // =========================================================================
-    // REPAIR PROGRESS OVERLAYS (DOM-based, on top of canvas)
-    // =========================================================================
-    function startRepairOverlay(zoneId) {
-      const z = zones.get(zoneId);
-      if (!z) return;
-      if (myRepairs.has(zoneId)) return;
-
-      // Position the overlay relative to board-wrapper
-      const overlay = document.createElement('div');
-      overlay.className = 'repair-overlay';
-      overlay.dataset.zoneId = zoneId;
-
-      overlay.innerHTML = `
-        <div class="repair-bar-wrap">
-          <div class="repair-bar-fill" style="width:0%"></div>
-        </div>
-        <div class="repair-label">repairing</div>
-      `;
-      boardWrap.appendChild(overlay);
-
-      const startedAt = Date.now();
-      myRepairs.set(zoneId, { startedAt, overlay });
-
-      function updateOverlay() {
-        if (!myRepairs.has(zoneId)) return;
-        const elapsed = Date.now() - startedAt;
-        const pct = Math.min(100, (elapsed / REPAIR_MS) * 100);
-        overlay.querySelector('.repair-bar-fill').style.width = `${pct}%`;
-
-        // Position relative to canvas
-        positionOverlay(overlay, z.x, z.y + z.radius + 12);
-
-        if (pct < 100) requestAnimationFrame(updateOverlay);
-      }
-      requestAnimationFrame(updateOverlay);
-    }
-
-    function positionOverlay(overlay, boardX, boardY) {
-      const canvasRect  = canvas.getBoundingClientRect();
-      const wrapperRect = boardWrap.getBoundingClientRect();
-      // Scale factor (canvas might be CSS-scaled)
-      const scaleX = canvasRect.width  / canvas.width;
-      const scaleY = canvasRect.height / canvas.height;
-
-      const left = canvasRect.left - wrapperRect.left + boardX * scaleX;
-      const top  = canvasRect.top  - wrapperRect.top  + boardY * scaleY;
-      overlay.style.left = `${left}px`;
-      overlay.style.top  = `${top}px`;
-    }
-
-    function removeRepairOverlay(zoneId) {
-      const entry = myRepairs.get(zoneId);
-      if (entry) {
-        entry.overlay.remove();
-        myRepairs.delete(zoneId);
-      }
-    }
-
-    // =========================================================================
-    // CANVAS RENDER LOOP
-    // =========================================================================
-    function draw() {
-      requestAnimationFrame(draw); // schedule next frame first so loop survives errors
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // -- Background gradient --
-      const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      grad.addColorStop(0, '#0d1117');
-      grad.addColorStop(1, '#0a0c0f');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // -- Grid --
-      ctx.strokeStyle = 'rgba(42, 45, 53, 0.7)';
-      ctx.lineWidth = 1;
-      const CELL = 80;
-      for (let x = 0; x <= canvas.width; x += CELL) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
-      }
-      for (let y = 0; y <= canvas.height; y += CELL) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
-      }
-
-      // -- Axis labels --
-      ctx.fillStyle = 'rgba(107, 114, 128, 0.4)';
-      ctx.font = '9px Space Mono, monospace';
-      ctx.textAlign = 'left';
-      for (let x = CELL; x < canvas.width; x += CELL * 2) {
-        ctx.fillText(x, x + 2, 10);
-      }
-      ctx.textAlign = 'right';
-      for (let y = CELL; y < canvas.height; y += CELL * 2) {
-        ctx.fillText(y, canvas.width - 2, y - 2);
-      }
-
-      const now = Date.now();
-
-      // -- Zones --
-      for (const z of zones.values()) {
-        drawZone(z, now);
-      }
-
-      // -- Agents --
-      for (const a of agents.values()) {
-        drawAgent(a);
-      }
-
-      // Update repair overlay positions every frame
-      for (const [zoneId, entry] of myRepairs) {
-        const z = zones.get(zoneId);
-        if (z) positionOverlay(entry.overlay, z.x, z.y + z.radius + 12);
-      }
-    }
-
-    function drawZone(z, now) {
-      const resolved = z.status === 'resolved';
-      const claimed  = z.status === 'active' && z.claimedBy;
-
-      const sev = Math.min(5, Math.max(1, z.severity));
-      const colors = [
-        null,
-        { ring: '#00cc66', fill: 'rgba(0,204,102,0.06)', text: '#00cc66' },   // 1
-        { ring: '#cccc00', fill: 'rgba(204,204,0,0.07)', text: '#cccc00' },   // 2
-        { ring: '#ffaa00', fill: 'rgba(255,170,0,0.08)', text: '#ffaa00' },   // 3
-        { ring: '#ff5000', fill: 'rgba(255,80,0,0.10)', text: '#ff5000' },    // 4
-        { ring: '#ff2828', fill: 'rgba(255,40,40,0.12)', text: '#ff2828' },   // 5
-      ];
-
-      const palette = resolved
-        ? { ring: 'rgba(0,204,102,0.3)', fill: 'rgba(0,204,102,0.04)', text: '#00cc66' }
-        : colors[sev];
-
-      // Pulsing effect for active unclaimed zones
-      let extraRadius = 0;
-      if (!resolved && !claimed) {
-        extraRadius = Math.sin(now / 500) * 4;
-      }
-
-      // Outer glow
-      const grd = ctx.createRadialGradient(z.x, z.y, 0, z.x, z.y, z.radius + extraRadius + 10);
-      grd.addColorStop(0, palette.fill);
-      grd.addColorStop(1, 'transparent');
-      ctx.beginPath();
-      ctx.arc(z.x, z.y, z.radius + extraRadius + 10, 0, Math.PI * 2);
-      ctx.fillStyle = grd;
-      ctx.fill();
-
-      // Fill
-      ctx.beginPath();
-      ctx.arc(z.x, z.y, z.radius + extraRadius, 0, Math.PI * 2);
-      ctx.fillStyle = palette.fill;
-      ctx.fill();
-
-      // Ring
-      ctx.beginPath();
-      ctx.arc(z.x, z.y, z.radius + extraRadius, 0, Math.PI * 2);
-      ctx.strokeStyle = resolved ? 'rgba(0,204,102,0.3)' : palette.ring;
-      ctx.lineWidth = claimed ? 3 : 1.5;
-      ctx.setLineDash(resolved ? [6, 4] : []);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.lineWidth = 1;
-
-      // Repair arc (sweep) if claimed
-      if (claimed && z.repairStartedAt) {
-        const elapsed = now - z.repairStartedAt;
-        const angle = Math.min(1, elapsed / REPAIR_MS) * Math.PI * 2;
-        ctx.beginPath();
-        ctx.arc(z.x, z.y, z.radius + extraRadius, -Math.PI / 2, -Math.PI / 2 + angle);
-        ctx.strokeStyle = '#00e5ff';
-        ctx.lineWidth = 4;
-        ctx.stroke();
-        ctx.lineWidth = 1;
-      }
-
-      // Label
-      if (!resolved) {
-        ctx.fillStyle = palette.text;
-        ctx.font = 'bold 12px Space Mono, monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText(`SEV ${sev}`, z.x, z.y + 5);
-        if (claimed) {
-          ctx.fillStyle = '#00e5ff';
-          ctx.font = '9px Space Grotesk, sans-serif';
-          ctx.fillText('REPAIRING', z.x, z.y + 18);
-        }
-      } else {
-        ctx.fillStyle = 'rgba(0,204,102,0.5)';
-        ctx.font = 'bold 11px Space Mono, monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText('RESOLVED', z.x, z.y + 5);
-      }
-    }
-
-    function drawAgent(a) {
+    agents.forEach(function(a) {
       const isMe = a.id === myId;
-      const half  = (a.size || 40) / 2;
-      const color = a.color || '#888';
-
-      // Glow for self
+      mCtx.beginPath();
+      mCtx.arc(a.x * MM_SX, a.y * MM_SY, isMe ? 3 : 2, 0, Math.PI * 2);
+      mCtx.fillStyle = a.color || '#888';
+      mCtx.fill();
       if (isMe) {
-        ctx.shadowBlur = 16;
-        ctx.shadowColor = color;
+        mCtx.strokeStyle = a.color || '#fff';
+        mCtx.lineWidth = 1;
+        mCtx.stroke();
       }
+    });
+  }
 
-      // Circle body
-      ctx.beginPath();
-      ctx.arc(a.x, a.y, half, 0, Math.PI * 2);
-      ctx.fillStyle = isMe ? color : `${color}cc`;
-      ctx.fill();
+  // ===========================================================================
+  // CANVAS RENDER LOOP
+  // ===========================================================================
+  function draw() {
+    requestAnimationFrame(draw);
 
-      // Ring for self
-      if (isMe) {
+    // Interpolate other agents
+    agents.forEach(function(a) {
+      if (a.id === myId) return;
+      const t = agentTargets.get(a.id);
+      if (t) { a.x += (t.x - a.x) * LERP; a.y += (t.y - a.y) * LERP; }
+    });
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const bg = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    bg.addColorStop(0, '#0d1117');
+    bg.addColorStop(1, '#0a0c0f');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.strokeStyle = 'rgba(42,45,53,0.6)';
+    ctx.lineWidth = 1;
+    const CELL = 80;
+    for (let x = 0; x <= canvas.width;  x += CELL) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke(); }
+    for (let y = 0; y <= canvas.height; y += CELL) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y);   ctx.stroke(); }
+
+    ctx.fillStyle = 'rgba(107,114,128,.3)';
+    ctx.font = '8px Space Mono, monospace';
+    ctx.textAlign = 'left';
+    for (let x = CELL; x < canvas.width;  x += CELL*2) ctx.fillText(x, x+2, 10);
+    ctx.textAlign = 'right';
+    for (let y = CELL; y < canvas.height; y += CELL*2) ctx.fillText(y, canvas.width-2, y-2);
+
+    const now = Date.now();
+
+    // Auto-mode target path
+    if (autoMode && currentTarget) {
+      const me = agents.get(myId);
+      if (me) {
         ctx.beginPath();
-        ctx.arc(a.x, a.y, half + 3, 0, Math.PI * 2);
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 2;
+        ctx.moveTo(me.x, me.y);
+        ctx.lineTo(currentTarget.x, currentTarget.y);
+        ctx.strokeStyle = 'rgba(255,107,0,0.22)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([6,4]);
         ctx.stroke();
+        ctx.setLineDash([]);
         ctx.lineWidth = 1;
-        ctx.shadowBlur = 0;
-        ctx.shadowColor = 'transparent';
       }
+    }
 
-      // Inner dot
+    zones.forEach(function(z) { drawZone(z, now); });
+    agents.forEach(function(a) { drawAgent(a); });
+
+    myRepairs.forEach(function(entry, zoneId) {
+      const z = zones.get(zoneId);
+      if (z) positionOverlay(entry.overlay, z.x, z.y + z.radius + 14);
+    });
+
+    drawMinimap();
+  }
+
+  function drawZone(z, now) {
+    const resolved = z.status === 'resolved';
+    const claimed  = z.status === 'active' && z.claimedBy;
+    const isTarget = autoMode && currentTarget && currentTarget.id === z.id;
+    const sev = Math.min(5, Math.max(1, z.severity));
+    const palette = [
+      null,
+      { ring: '#00cc66', fill: 'rgba(0,204,102,0.07)',  text: '#00cc66' },
+      { ring: '#cccc00', fill: 'rgba(204,204,0,0.08)',  text: '#cccc00' },
+      { ring: '#ffaa00', fill: 'rgba(255,170,0,0.09)',  text: '#ffaa00' },
+      { ring: '#ff5000', fill: 'rgba(255,80,0,0.11)',   text: '#ff5000' },
+      { ring: '#ff2828', fill: 'rgba(255,40,40,0.13)',  text: '#ff2828' }
+    ];
+    const p = resolved ? { ring: 'rgba(0,204,102,0.3)', fill: 'rgba(0,204,102,0.04)', text: '#00cc66' } : palette[sev];
+    const pulse = (!resolved && !claimed) ? Math.sin(now / 480) * 4 : 0;
+    const R = z.radius + pulse;
+
+    ctx.beginPath();
+    ctx.arc(z.x, z.y, R, 0, Math.PI * 2);
+    ctx.fillStyle = p.fill;
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(z.x, z.y, R, 0, Math.PI * 2);
+    ctx.strokeStyle = isTarget ? 'rgba(255,107,0,0.9)' : (resolved ? 'rgba(0,204,102,0.3)' : p.ring);
+    ctx.lineWidth = isTarget ? 3 : (claimed ? 2 : 1.5);
+    ctx.setLineDash(resolved ? [5,4] : []);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.lineWidth = 1;
+
+    if (claimed && z.repairStartedAt) {
+      const angle = Math.min(1, (now - z.repairStartedAt) / REPAIR_MS) * Math.PI * 2;
       ctx.beginPath();
-      ctx.arc(a.x, a.y, half * 0.35, 0, Math.PI * 2);
-      ctx.fillStyle = isMe ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)';
-      ctx.fill();
+      ctx.arc(z.x, z.y, R, -Math.PI / 2, -Math.PI / 2 + angle);
+      ctx.strokeStyle = '#00e5ff';
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+      ctx.lineWidth = 1;
+    }
 
-      // Name tag
-      const nameText = isMe ? `▶ ${a.name}` : a.name;
-      ctx.font = `${isMe ? 'bold ' : ''}11px Space Grotesk, sans-serif`;
+    if (!resolved) {
+      ctx.fillStyle = isTarget ? 'rgba(255,107,0,0.9)' : p.text;
+      ctx.font = 'bold 11px Space Mono, monospace';
       ctx.textAlign = 'center';
-      // Background pill
-      const textW = ctx.measureText(nameText).width;
-      const pillX = a.x - textW / 2 - 4;
-      const pillY = a.y - half - 22;
-      ctx.fillStyle = 'rgba(10, 12, 15, 0.75)';
+      ctx.fillText('SEV ' + sev, z.x, z.y + 4);
+      if (claimed) {
+        ctx.fillStyle = '#00e5ff';
+        ctx.font = '8px Space Grotesk, sans-serif';
+        ctx.fillText('REPAIRING', z.x, z.y + 16);
+      }
+      if (isTarget && !claimed) {
+        ctx.fillStyle = 'rgba(255,107,0,.8)';
+        ctx.font = '8px Space Grotesk, sans-serif';
+        ctx.fillText('TARGET', z.x, z.y + 16);
+      }
+    } else {
+      ctx.fillStyle = 'rgba(0,204,102,.45)';
+      ctx.font = 'bold 10px Space Mono, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('RESOLVED', z.x, z.y + 4);
+    }
+  }
+
+  function drawAgent(a) {
+    const isMe = a.id === myId;
+    const half = (a.size || 40) / 2;
+    const color = a.color || '#888';
+    if (isMe) { ctx.shadowBlur = 14; ctx.shadowColor = color; }
+    ctx.beginPath();
+    ctx.arc(a.x, a.y, half, 0, Math.PI * 2);
+    ctx.fillStyle = isMe ? color : (color + 'cc');
+    ctx.fill();
+    if (isMe) {
       ctx.beginPath();
-      ctx.roundRect(pillX, pillY, textW + 8, 16, 4);
-      ctx.fill();
-      ctx.fillStyle = isMe ? color : '#c0c4cc';
-      ctx.fillText(nameText, a.x, pillY + 12);
+      ctx.arc(a.x, a.y, half + 3, 0, Math.PI * 2);
+      ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.stroke(); ctx.lineWidth = 1;
+      ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
     }
+    ctx.beginPath();
+    ctx.arc(a.x, a.y, half * 0.32, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    ctx.fill();
+    const label = isMe ? ('> ' + a.name) : a.name;
+    ctx.font = (isMe ? 'bold ' : '') + '11px Space Grotesk, sans-serif';
+    ctx.textAlign = 'center';
+    const tw = ctx.measureText(label).width;
+    const py = a.y - half - 20;
+    ctx.fillStyle = 'rgba(10,12,15,.8)';
+    ctx.beginPath();
+    if (ctx.roundRect) {
+      ctx.roundRect(a.x - tw/2 - 4, py, tw + 8, 15, 3);
+    } else {
+      ctx.rect(a.x - tw/2 - 4, py, tw + 8, 15);
+    }
+    ctx.fill();
+    ctx.fillStyle = isMe ? color : '#b0b4bc';
+    ctx.fillText(label, a.x, py + 11);
+  }
 
-    // =========================================================================
-    // JOIN FLOW
-    // =========================================================================
-    joinBtn.addEventListener('click', () => {
-      const name = nameIn.value.trim();
-      if (!name) { nameIn.focus(); return; }
-      joinBtn.disabled = true;
-      myName  = name;
-      myColor = colorIn.value;
+  // ===========================================================================
+  // AUTO-AGENT — PHASE 3
+  // ===========================================================================
+  function pickTarget() {
+    const me = agents.get(myId);
+    if (!me) return null;
+    let best = null, bestScore = -Infinity;
+    zones.forEach(function(z) {
+      if (z.status !== 'active') return;
+      if (z.claimedBy && z.claimedBy !== myId) return; // skip contested
+      const dist  = Math.hypot(z.x - me.x, z.y - me.y);
+      const score = z.severity * W_SEV + dist * W_DIST;
+      if (score > bestScore) { bestScore = score; best = z; }
+    });
+    return best;
+  }
 
-      setStatus('Connecting…');
-      socket = io(SERVER);
+  function stepToward(me, target) {
+    const dx = target.x - me.x, dy = target.y - me.y;
+    const dist = Math.hypot(dx, dy);
+    if (dist <= AUTO_SPEED) return { x: target.x, y: target.y };
+    return { x: me.x + (dx / dist) * AUTO_SPEED, y: me.y + (dy / dist) * AUTO_SPEED };
+  }
 
-      socket.on('connect', () => {
-        connDot.className = 'conn-dot connected';
-        setStatus('Connected — joining board…');
-        log('Connected to server', 'info');
+  function autoTick() {
+    if (!socket || !myId) return;
+    const me = agents.get(myId);
+    if (!me) return;
+    currentTarget = pickTarget();
+    refreshZonesList();
+    if (!currentTarget) return;
+    const dist = Math.hypot(currentTarget.x - me.x, currentTarget.y - me.y);
+    if (dist <= currentTarget.radius) {
+      socket.emit('zone:claim', { zoneId: currentTarget.id }, function(res) {
+        if (res && res.ok) log('[AUTO] Claimed SEV ' + (currentTarget ? currentTarget.severity : '?') + ' zone', 'auto');
+      });
+    } else {
+      const next = stepToward(me, currentTarget);
+      socket.emit('agent:move', { x: next.x, y: next.y });
+      me.x = next.x; me.y = next.y;
+    }
+  }
 
-        socket.emit('agent:join', { name: myName, color: myColor }, (res) => {
-          if (res.error) {
-            setStatus(`Error: ${res.error}`);
-            log(`Join error: ${res.error}`, 'error');
-            joinBtn.disabled = false;
-            return;
-          }
+  function setAutoMode(on) {
+    autoMode = on;
+    if (on) {
+      autoInterval = setInterval(autoTick, Math.round(1000 / AUTO_HZ));
+      autoBtn.classList.add('active');
+      autoBtn.innerHTML = '&#9889; AUTO ON';
+      statMode.textContent = 'ON';
+      log('Autonomous mode ENABLED', 'auto');
+    } else {
+      clearInterval(autoInterval);
+      autoInterval = null;
+      currentTarget = null;
+      autoBtn.classList.remove('active');
+      autoBtn.innerHTML = '&#9889; AUTO';
+      statMode.textContent = 'OFF';
+      log('Autonomous mode disabled', 'warn');
+    }
+    refreshZonesList();
+  }
 
-          myId     = res.agent.id;
-          joinedAt = Date.now();
+  autoBtn.addEventListener('click', function() { setAutoMode(!autoMode); });
 
-          // Populate initial world state (add own agent first, then others)
-          agents.set(res.agent.id, res.agent);
-          for (const a of res.agents) agents.set(a.id, a);
-          for (const z of res.zones)  zones.set(z.id, z);
+  // ===========================================================================
+  // JOIN FLOW
+  // ===========================================================================
+  joinBtn.addEventListener('click', function() {
+    const name = nameIn.value.trim();
+    if (!name) { nameIn.focus(); return; }
+    joinBtn.disabled = true;
+    myName  = name;
+    myColor = colorIn.value;
+    setStatus('Connecting...');
+    socket = io(SERVER);
 
-          // Hide join UI, show keys hint
-          nameIn.disabled    = true;
-          colorIn.disabled   = true;
-          joinBtn.style.display = 'none';
-          keysHint.style.display = 'flex';
+    socket.on('connect', function() {
+      connDot.className = 'conn-dot connected';
+      setStatus('Connected -- joining board...');
+      log('Connected to server', 'info');
+      socket.emit('agent:join', { name: myName, color: myColor }, function(res) {
+        if (res.error) {
+          setStatus('Error: ' + res.error);
+          log('Join error: ' + res.error, 'error');
+          joinBtn.disabled = false;
+          return;
+        }
+        myId     = res.agent.id;
+        joinedAt = Date.now();
+        agents.set(res.agent.id, res.agent);
+        res.agents.forEach(function(a) { agents.set(a.id, a); agentTargets.set(a.id, { x: a.x, y: a.y }); });
+        res.zones.forEach(function(z)  { zones.set(z.id, z); });
+        nameIn.disabled  = true;
+        colorIn.disabled = true;
+        joinBtn.style.display = 'none';
+        autoBtn.style.display = 'inline-flex';
+        keysHint.style.display = 'flex';
+        refreshAgentsList();
+        refreshZonesList();
+        setStatus('Joined as <span>' + esc(myName) + '</span> -- click to move or press <span>A</span> for auto');
+        log('Joined board as "' + myName + '"', 'success');
+      });
+    });
 
-          refreshAgentsList();
-          refreshZonesList();
-          setStatus(`Joined as <span>${escHtml(myName)}</span> — click the board to move`);
-          log(`Joined board as "${myName}"`, 'success');
-          statAgents.textContent = agents.size;
+    socket.on('disconnect', function() {
+      connDot.className = 'conn-dot error';
+      setAutoMode(false);
+      setStatus('Disconnected');
+      log('Disconnected', 'error');
+    });
+
+    socket.on('connect_error', function(err) {
+      connDot.className = 'conn-dot error';
+      setStatus('Connection error: ' + err.message);
+      log('Connection error: ' + err.message, 'error');
+      joinBtn.disabled = false;
+    });
+
+    // ---- Agent events -------------------------------------------------------
+    socket.on('agent:joined', function(a) {
+      agents.set(a.id, a);
+      agentTargets.set(a.id, { x: a.x, y: a.y });
+      refreshAgentsList();
+      log('Agent joined: ' + a.name, 'info');
+    });
+
+    socket.on('agent:moved', function(data) {
+      agentTargets.set(data.id, { x: data.x, y: data.y });
+      if (data.id === myId) {
+        const a = agents.get(data.id);
+        if (a) { a.x = data.x; a.y = data.y; }
+      }
+    });
+
+    socket.on('agent:left', function(data) {
+      const a = agents.get(data.id);
+      if (a) log('Agent left: ' + a.name, 'warn');
+      agents.delete(data.id);
+      agentTargets.delete(data.id);
+      refreshAgentsList();
+    });
+
+    // ---- Zone events --------------------------------------------------------
+    socket.on('zone:spawned', function(z) {
+      zones.set(z.id, z);
+      refreshZonesList();
+      log('Zone spawned -- SEV ' + z.severity + ' at (' + Math.round(z.x) + ', ' + Math.round(z.y) + ')', 'warn');
+    });
+
+    socket.on('zone:updated', function(z) {
+      zones.set(z.id, z);
+      refreshZonesList();
+      if (z.claimedBy === myId && !myRepairs.has(z.id)) {
+        startRepairOverlay(z.id);
+        log('You claimed SEV ' + z.severity + ' zone -- hold position!', 'success');
+      }
+    });
+
+    socket.on('zone:resolved', function(z) {
+      const prev = zones.get(z.id);
+      zones.set(z.id, z);
+      removeRepairOverlay(z.id);
+      const wasOurs = (z.claimedBy === myId) || myRepairs.has(z.id);
+      if (wasOurs) {
+        const duration = (prev && prev.repairStartedAt) ? Date.now() - prev.repairStartedAt : REPAIR_MS;
+        repairHistory.push({ resolvedAt: Date.now(), duration: duration, severity: z.severity });
+        myZonesFixed++;
+        myScore += z.severity * 100;
+        currentStreak++;
+        if (currentStreak > longestStreak) longestStreak = currentStreak;
+        statZones.textContent = myZonesFixed;
+        statScore.textContent = myScore;
+        siStreak.textContent  = currentStreak;
+        drawChart();
+        log('Zone resolved! +' + (z.severity * 100) + ' pts | streak: ' + currentStreak, 'success');
+      } else {
+        currentStreak = 0;
+        siStreak.textContent = 0;
+        log('Zone resolved by another agent', 'info');
+      }
+      if (currentTarget && currentTarget.id === z.id) currentTarget = null;
+      refreshZonesList();
+      setTimeout(function() { zones.delete(z.id); refreshZonesList(); }, 3000);
+    });
+  });
+
+  // ===========================================================================
+  // MOVEMENT
+  // ===========================================================================
+  canvas.addEventListener('click', function(e) {
+    if (!socket || !myId || autoMode) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left) * (canvas.width  / rect.width);
+    const y = (e.clientY - rect.top)  * (canvas.height / rect.height);
+    socket.emit('agent:move', { x: x, y: y });
+    const me = agents.get(myId);
+    if (me) { me.x = x; me.y = y; }
+    tryClaimAt(x, y);
+  });
+
+  const NUDGE = 20;
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'a' || e.key === 'A') {
+      if (myId) { e.preventDefault(); setAutoMode(!autoMode); }
+      return;
+    }
+    if (!socket || !myId || autoMode) return;
+    const me = agents.get(myId);
+    if (!me) return;
+    let dx = 0, dy = 0;
+    if (e.key === 'ArrowLeft')  dx = -NUDGE;
+    if (e.key === 'ArrowRight') dx =  NUDGE;
+    if (e.key === 'ArrowUp')    dy = -NUDGE;
+    if (e.key === 'ArrowDown')  dy =  NUDGE;
+    if (!dx && !dy) return;
+    e.preventDefault();
+    const nx = Math.max(0, Math.min(canvas.width,  me.x + dx));
+    const ny = Math.max(0, Math.min(canvas.height, me.y + dy));
+    socket.emit('agent:move', { x: nx, y: ny });
+    me.x = nx; me.y = ny;
+    tryClaimAt(nx, ny);
+  });
+
+  function tryClaimAt(x, y) {
+    zones.forEach(function(z) {
+      if (z.status !== 'active') return;
+      if (Math.hypot(z.x - x, z.y - y) <= z.radius) {
+        socket.emit('zone:claim', { zoneId: z.id }, function(res) {
+          if (res && res.ok) log('Claimed SEV ' + z.severity + ' zone', 'success');
         });
-      });
-
-      socket.on('disconnect', () => {
-        connDot.className = 'conn-dot error';
-        setStatus('Disconnected from server');
-        log('Disconnected', 'error');
-      });
-
-      socket.on('connect_error', (err) => {
-        connDot.className = 'conn-dot error';
-        setStatus(`Connection error: ${err.message}`);
-        log(`Connection error: ${err.message}`, 'error');
-        joinBtn.disabled = false;
-      });
-
-      // ---- Agent events ----------------------------------------------------
-      socket.on('agent:joined', (a) => {
-        agents.set(a.id, a);
-        refreshAgentsList();
-        log(`Agent joined: ${a.name}`, 'info');
-      });
-
-      socket.on('agent:moved', ({ id, x, y }) => {
-        const a = agents.get(id);
-        if (a) { a.x = x; a.y = y; }
-      });
-
-      socket.on('agent:left', ({ id }) => {
-        const a = agents.get(id);
-        if (a) log(`Agent left: ${a.name}`, 'warn');
-        agents.delete(id);
-        refreshAgentsList();
-      });
-
-      // ---- Zone events -----------------------------------------------------
-      socket.on('zone:spawned', (z) => {
-        zones.set(z.id, z);
-        refreshZonesList();
-        log(`Zone spawned — SEV ${z.severity} at (${Math.round(z.x)}, ${Math.round(z.y)})`, 'warn');
-      });
-
-      socket.on('zone:updated', (z) => {
-        zones.set(z.id, z);
-        refreshZonesList();
-        // If we are the claimer, start the overlay
-        if (z.claimedBy === myId && !myRepairs.has(z.id)) {
-          startRepairOverlay(z.id);
-          log(`You claimed zone SEV ${z.severity} — hold position!`, 'success');
-        }
-      });
-
-      socket.on('zone:resolved', (z) => {
-        zones.set(z.id, z);
-        removeRepairOverlay(z.id);
-        refreshZonesList();
-
-        if (z.claimedBy === myId || myRepairs.has(z.id)) {
-          myZonesFixed++;
-          myScore += z.severity * 100;
-          statZones.textContent = myZonesFixed;
-          statScore.textContent = myScore;
-          log(`Zone resolved! +${z.severity * 100} pts (SEV ${z.severity})`, 'success');
-        } else {
-          log(`Zone resolved by another agent`, 'info');
-        }
-        // Clean up resolved zones after 3s
-        setTimeout(() => zones.delete(z.id), 3000);
-      });
-    });
-
-    // =========================================================================
-    // MOVEMENT — click on board
-    // =========================================================================
-    canvas.addEventListener('click', (e) => {
-      if (!socket || !myId) return;
-
-      const rect  = canvas.getBoundingClientRect();
-      const scaleX = canvas.width  / rect.width;
-      const scaleY = canvas.height / rect.height;
-      const x = (e.clientX - rect.left) * scaleX;
-      const y = (e.clientY - rect.top)  * scaleY;
-
-      // Move
-      socket.emit('agent:move', { x, y });
-      const me = agents.get(myId);
-      if (me) { me.x = x; me.y = y; }
-
-      // Auto-claim any active zone we land in
-      for (const z of zones.values()) {
-        if (z.status !== 'active') continue;
-        const dist = Math.hypot(z.x - x, z.y - y);
-        if (dist <= z.radius) {
-          socket.emit('zone:claim', { zoneId: z.id }, (res) => {
-            if (res && res.ok) {
-              log(`Claimed zone ${z.id} (SEV ${z.severity})`, 'success');
-            }
-          });
-          break;
-        }
       }
     });
+  }
 
-    // =========================================================================
-    // MOVEMENT — arrow keys (nudge)
-    // =========================================================================
-    const NUDGE = 20;
-    document.addEventListener('keydown', (e) => {
-      if (!socket || !myId) return;
-      const me = agents.get(myId);
-      if (!me) return;
+  // ===========================================================================
+  // HELPERS
+  // ===========================================================================
+  function setStatus(html) { statusBar.innerHTML = html; }
 
-      let dx = 0, dy = 0;
-      if (e.key === 'ArrowLeft')  dx = -NUDGE;
-      if (e.key === 'ArrowRight') dx =  NUDGE;
-      if (e.key === 'ArrowUp')    dy = -NUDGE;
-      if (e.key === 'ArrowDown')  dy =  NUDGE;
-      if (!dx && !dy) return;
-
-      e.preventDefault();
-      const nx = Math.max(0, Math.min(canvas.width,  me.x + dx));
-      const ny = Math.max(0, Math.min(canvas.height, me.y + dy));
-      socket.emit('agent:move', { x: nx, y: ny });
-      me.x = nx;
-      me.y = ny;
-
-      // Auto-claim
-      for (const z of zones.values()) {
-        if (z.status !== 'active') continue;
-        const dist = Math.hypot(z.x - nx, z.y - ny);
-        if (dist <= z.radius) {
-          socket.emit('zone:claim', { zoneId: z.id }, (res) => {
-            if (res && res.ok) log(`Claimed zone SEV ${z.severity} via keyboard`, 'success');
-          });
-          break;
-        }
-      }
-    });
-
-    // =========================================================================
-    // HELPERS
-    // =========================================================================
-    function setStatus(html) {
-      statusBar.innerHTML = html;
-    }
-
-    // =========================================================================
-    // KICK OFF RENDER
-    // =========================================================================
-    draw();
+  // ===========================================================================
+  // START
+  // ===========================================================================
+  drawChart();
+  draw();
   </script>
 </body>
 </html>
