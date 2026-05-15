@@ -665,6 +665,7 @@
     // CANVAS RENDER LOOP
     // =========================================================================
     function draw() {
+      requestAnimationFrame(draw); // schedule next frame first so loop survives errors
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // -- Background gradient --
@@ -714,8 +715,6 @@
         const z = zones.get(zoneId);
         if (z) positionOverlay(entry.overlay, z.x, z.y + z.radius + 12);
       }
-
-      requestAnimationFrame(draw);
     }
 
     function drawZone(z, now) {
@@ -744,7 +743,7 @@
 
       // Outer glow
       const grd = ctx.createRadialGradient(z.x, z.y, 0, z.x, z.y, z.radius + extraRadius + 10);
-      grd.addColorStop(0, palette.fill.replace(')', ', 0.5)').replace('rgba', 'rgba') );
+      grd.addColorStop(0, palette.fill);
       grd.addColorStop(1, 'transparent');
       ctx.beginPath();
       ctx.arc(z.x, z.y, z.radius + extraRadius + 10, 0, Math.PI * 2);
@@ -878,7 +877,8 @@
           myId     = res.agent.id;
           joinedAt = Date.now();
 
-          // Populate initial world state
+          // Populate initial world state (add own agent first, then others)
+          agents.set(res.agent.id, res.agent);
           for (const a of res.agents) agents.set(a.id, a);
           for (const z of res.zones)  zones.set(z.id, z);
 
